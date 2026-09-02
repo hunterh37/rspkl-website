@@ -259,18 +259,15 @@ TIERS = [
 ]
 
 ELO_CARDS = [
-    ("01", "Ten to place",
-     "Ten placement fights seed your rating. Win them clean and you skip the "
-     "lower metals outright &mdash; nobody grinds up from Bronze who never "
-     "belonged there."),
+    ("01", "Ten placement fights",
+     "Ten placement fights seed your rating. A clean run places you above "
+     "Bronze outright."),
     ("02", "Every fight is rated",
-     "Rated duels and Wilderness kills move Elo both ways. Taking down a "
-     "higher-rated PKer pays more than farming one below you, so the ladder "
-     "cannot be climbed on easy targets."),
+     "Rated duels and Wilderness kills both move Elo. Beating a higher rating "
+     "pays more than beating a lower one."),
     ("03", "Promotion &amp; grace",
-     "Cross a metal&rsquo;s ceiling and you promote on the spot. Drop below it "
-     "and you get a three-fight grace window to hold the line before the "
-     "crest changes."),
+     "Crossing a tier ceiling promotes on the spot. Dropping below it leaves "
+     "three fights to recover before the crest changes."),
 ]
 
 
@@ -295,10 +292,8 @@ def ladder_section() -> str:
     return f"""
     <section class="section" id="ranked">
       <div class="container">
-        {section_head("Ranked ladder",
-                      "Bronze to Dragon",
-                      "Five divisions, one rating. Your crest is not a cosmetic "
-                      "&mdash; it is the Elo you can defend.")}
+        {section_head("Ranked ladder", "Bronze to Dragon",
+                      "Five divisions on one rating. Your crest is the Elo you hold.")}
         <div class="ladder-rail rv">{tiers}</div>
         <div class="elo-grid">{cards}</div>
         <div class="elo-formula rv">
@@ -350,7 +345,7 @@ def build_home():
         <div class="hero-kicker"><span class="live-mark"></span> Old School combat · Skill-based Elo</div>
         <h1 class="hero-title">Rule <span class="line-gold">the ladder.</span></h1>
         <p class="hero-sub">Ten placement fights set your rating. Every fight after that
-        moves you through five competitive divisions—from Bronze to Dragon.</p>
+        moves it, across five divisions from Bronze to Dragon.</p>
         <div class="hero-actions">
           <a class="btn btn-gold btn-lg" href="/play/"><i class="bi bi-crosshair"></i> ENTER THE LEAGUE</a>
           <a class="hero-text-link" href="/hiscore/">VIEW THE LADDER <i class="bi bi-arrow-right"></i></a>
@@ -364,7 +359,7 @@ def build_home():
 
     <section class="section ranked-system" id="ranked">
       <div class="container">
-        {section_head("The competitive system", "Built for the climb", "A transparent rating system. No vague tiers, no decorative ranks—just performance.")}
+        {section_head("The competitive system", "How the rating works", "One Elo rating, five divisions, and a published formula.")}
         <div class="elo-grid">{cards}</div>
         <div class="elo-formula rv">
           <span>NEW ELO = ELO + <b>K</b> &times; (RESULT &minus; EXPECTED)</span>
@@ -386,7 +381,7 @@ def build_home():
 def build_play():
     content = f"""
     {page_hero("Web client", "Play RSPKL <em>Instantly</em>",
-               "No download, no registration — pick a username and the league is yours.")}
+               "Runs in the browser. No download, no registration — accounts are created on first login.")}
     <section class="section">
       <div class="container">
         <div class="client-frame rv">
@@ -423,27 +418,27 @@ def build_play():
         </div>
         <div class="note-strip">
           <i class="bi bi-info-circle"></i>
-          <span>The web client deployment finalises with Season 1. Your login is saved to
-          this device — when the league gate opens you will log straight into the lobby.</span>
+          <span>The web client deploys with Season 1. Logins entered here are saved to this
+          device.</span>
         </div>
       </div>
     </section>
     <section class="section" id="mobile">
       <div class="container">
-        {section_head("Any device", "Desktop or Mobile", "The same league, everywhere. Choose how you want to play.")}
+        {section_head("Any device", "Desktop or Mobile", "One account, one ladder, both platforms.")}
         <div class="grid-2">
           <div class="panel choice-card rv">
             <span class="glyph"><i class="bi bi-display"></i></span>
             <h3>Desktop Browser</h3>
-            <p>Full-screen action with the complete interface suite. Launches straight
-            from this page — no install, automatic updates.</p>
+            <p>Full interface suite at full screen. Launches from this page; no install,
+            updates automatically.</p>
             <a class="btn btn-gold" href="#top">OPEN WEB CLIENT</a>
           </div>
           <div class="panel choice-card rv">
             <span class="glyph"><i class="bi bi-phone"></i></span>
             <h3>Mobile Browser</h3>
-            <p>Optimized touch controls for PK on the move. Same account, same ladder,
-            same Wilderness — right in your pocket.</p>
+            <p>Touch controls tuned for phones. Same account, ladder and Wilderness as
+            desktop.</p>
             <a class="btn btn-outline js-soon" data-soon="The mobile client" href="#">OPEN MOBILE CLIENT</a>
           </div>
         </div>
@@ -472,23 +467,22 @@ def build_download():
         </div>"""
 
     content = f"""
-    {page_hero("Client downloads", "Take the League <em>Home</em>",
-               "Prefer a native client? Every build auto-updates. Or skip the download and play in your browser.")}
+    {page_hero("Client downloads", "Native <em>Clients</em>",
+               "Builds for Windows, macOS, Linux and Java. All of them update automatically.")}
     <section class="section">
       <div class="container">
-        {section_head("No download required", "Instant Play", "The fastest way into the Wilderness.")}
+        {section_head("No download required", "Instant Play", "Both browser clients run without an install.")}
         <div class="grid-2">
           <div class="panel choice-card rv">
             <span class="glyph"><i class="bi bi-window-desktop"></i></span>
             <h3>Web Client</h3>
-            <p>Launch instantly in your desktop browser. No download, no registration,
-            always up to date.</p>
+            <p>Runs in the desktop browser. No download, no registration, always current.</p>
             <a class="btn btn-gold" href="/play/">PLAY ON BROWSER</a>
           </div>
           <div class="panel choice-card rv">
             <span class="glyph"><i class="bi bi-phone"></i></span>
             <h3>Mobile Client</h3>
-            <p>Launch instantly on your phone. Same account, same ladder, touch-tuned
+            <p>Runs in the phone browser. Same account and ladder, touch-tuned
             interfaces.</p>
             <a class="btn btn-outline" href="/play/#mobile">PLAY ON MOBILE</a>
           </div>
@@ -502,9 +496,8 @@ def build_download():
         <div class="os-grid">{os_cards}</div>
         <div class="note-strip">
           <i class="bi bi-tools"></i>
-          <span><b>Problems loading?</b> Try the RSPKL debug tool + uninstaller, or use an
-          alternative installer (no admin required). Downloads unlock with Season 1 —
-          join Discord to get pinged the moment they go live.</span>
+          <span>A debug tool, an uninstaller and a no-admin installer are available for load
+          failures. Downloads unlock with Season 1.</span>
         </div>
       </div>
     </section>"""
@@ -526,15 +519,13 @@ def build_register():
           <div class="panel choice-card rv">
             <span class="glyph"><i class="bi bi-window-desktop"></i></span>
             <h3>Web Client</h3>
-            <p>Play instantly in your desktop browser. Your account is created when you
-            log in for the first time.</p>
+            <p>Desktop browser. The account is created on first login.</p>
             <a class="btn btn-gold" href="/play/">OPEN WEB CLIENT</a>
           </div>
           <div class="panel choice-card rv">
             <span class="glyph"><i class="bi bi-phone"></i></span>
             <h3>Mobile Client</h3>
-            <p>Play instantly on your phone. Your account is created when you log in for
-            the first time.</p>
+            <p>Phone browser. The account is created on first login.</p>
             <a class="btn btn-outline" href="/play/#mobile">OPEN MOBILE CLIENT</a>
           </div>
         </div>
@@ -553,9 +544,8 @@ def build_register():
         </div>
         <div class="note-strip">
           <i class="bi bi-exclamation-triangle"></i>
-          <span>Username already taken? If you see “Invalid username or password,” simply
-          try another username. Prefer the downloadable desktop client?
-          <a href="/download/">View downloads</a>.</span>
+          <span>“Invalid username or password” on a new account means the name is taken —
+          pick another. Native builds are on the <a href="/download/">downloads page</a>.</span>
         </div>
       </div>
     </section>"""
@@ -707,11 +697,11 @@ def build_donate():
     ])
 
     faq_items = [
-        ("How fast is delivery?", "Credits, ranks and items deliver instantly in-game — if you are online you will see the reward within seconds. Offline? It is waiting in your bank on next login."),
+        ("How fast is delivery?", "Delivery is instant in-game while online, and waits in your bank otherwise."),
         ("What payment methods are accepted?", "All major cards plus regional methods via the league checkout. Currency is converted automatically at daily rates."),
         ("Can I upgrade my rank later?", "Yes — pay the difference at any time. Your tier perks upgrade immediately on claim."),
         ("What does the * value mean?", "The PKP value shows what the purchase would be worth if traded for player-kill points on the league market."),
-        ("Do ranks affect combat balance?", "Never. Ranks unlock convenience and cosmetics — combat power stays on your hands."),
+        ("Do ranks affect combat balance?", "No. Ranks unlock convenience commands and cosmetics only."),
     ]
     faq = "".join(
         f"<details><summary>{q}</summary><div class='a'>{a}</div></details>"
@@ -720,7 +710,7 @@ def build_donate():
 
     content = f"""
     {page_hero("Support the league", "RSPKL <em>Shop</em>",
-               "Every purchase keeps the league online and funds the Season prize pools. Use the buttons at the bottom of the page for extra information.")}
+               "Credits, supporter ranks, mystery boxes and scrolls. Instant in-game delivery.")}
     <section class="section">
       <div class="container">
         <div class="shop-strip rv">
@@ -733,18 +723,18 @@ def build_donate():
         {section_head("Top up", "League Credits", "Spend on ranks, boxes and the seasonal shop.")}
         <div class="shop-grid">{credits}</div>
 
-        {section_head("Climb the ladder", "Supporter Ranks",
-               "Six tiers of convenience, cosmetics and boosted drop rates. Combat power is never for sale.")}
+        {section_head("Supporter tiers", "Supporter Ranks",
+               "Six tiers of commands, cosmetics and boosted drop rates. No combat stats are sold.")}
         <div class="shop-grid">{ranks}</div>
 
-        {section_head("Straight to the market", "League Points", "PK points delivered straight to your pouch.")}
+        {section_head("PK points", "League Points", "PKP delivered straight to your pouch.")}
         <div class="shop-grid">{points}</div>
 
-        {section_head("Roll the bones", "Mystery Boxes",
-               "Seeded, provably fair — see the Provably Fair page for how rolls are verified.")}
+        {section_head("Mystery boxes", "Mystery Boxes",
+               "Seeded rolls. The Provably Fair page documents how they are verified.")}
         <div class="shop-grid">{boxes_html}</div>
 
-        {section_head("Unlock &amp; upgrade", "Scrolls &amp; Lamps")}
+        {section_head("Consumables", "Scrolls &amp; Lamps")}
         <div class="shop-grid">{scrolls}</div>
 
         <div class="shop-foot">
@@ -814,7 +804,7 @@ def build_hiscore():
 
     content = f"""
     {page_hero("Ladders", "RSPKL <em>Hiscores</em>",
-               "Every kill counts. Track the ladders across combat, skills, LMS and monster killcounts.")}
+               "Ladders for combat, skills, LMS rating and monster killcounts, in Normal and Hardcore PvP.")}
     <section class="section">
       <div class="container">
         <div class="with-side">
@@ -885,8 +875,8 @@ def build_battles():
     """
     content = f"""
     {page_hero("Scheduled PvP", "The <em>Battle Finder</em>",
-               "Rated 1v1s on one ladder and three builds - Pure NH, Zerk NH, Main NH, "
-               "identical gear. Watch what is booked, then get told before it starts.")}
+               "Rated 1v1s in three builds - Pure NH, Zerk NH and Main NH - on one ladder "
+               "with identical gear.")}
     <section class="section">
       <div class="container">
         <div class="with-side">
@@ -911,8 +901,8 @@ def build_battles():
             <div class="panel rv">
               <div class="panel-head"><h3>Fight alerts</h3></div>
               <div class="panel-body">
-                <p class="sub">Get a text or an email <b>5 minutes</b> and <b>1 minute</b>
-                before your next battle - even when you are logged out.</p>
+                <p class="sub">Email or text <b>5 minutes</b> and <b>1 minute</b> before your
+                next battle, logged in or not.</p>
                 <form id="bf-alerts">
                   <div class="field">
                     <label for="bf-user">In-game name</label>
@@ -947,18 +937,18 @@ def build_battles():
               <div class="panel-body hs-cats">
                 <div class="cat-group">
                   <p class="cat-title">In game</p>
-                  <p class="sub"><b>::battles</b> opens the finder. Pick a build, queue, and
-                  you are paired with the closest rating waiting.</p>
+                  <p class="sub"><b>::battles</b> opens the finder. Queueing a build pairs you
+                  with the closest rating waiting.</p>
                 </div>
                 <div class="cat-group">
                   <p class="cat-title">Book ahead</p>
-                  <p class="sub">Post a battle with an open seat at a time you choose. It
-                  lands on this board for anyone to take.</p>
+                  <p class="sub">A posted battle with an open seat is listed on this board
+                  until someone takes it.</p>
                 </div>
                 <div class="cat-group">
                   <p class="cat-title">Rating</p>
-                  <p class="sub">Bronze through Dragon on the same ladder the Wilderness
-                  uses. Beating someone above you is worth more.</p>
+                  <p class="sub">Bronze through Dragon on the Wilderness ladder. Wins against
+                  higher ratings pay more Elo.</p>
                 </div>
               </div>
             </div>
@@ -990,8 +980,8 @@ def build_killcams():
     """
     content = f"""
     {page_hero("Replays", "Top <em>Killcams</em>",
-               "Every kill in the wilderness is recorded. Watch the last five seconds "
-               "back, and vote for the ones worth remembering.")}
+               "The last five seconds of every Wilderness kill, replayed tick by tick "
+               "and ranked by player vote.")}
     <section class="section">
       <div class="container">
         <div class="with-side">
@@ -1025,12 +1015,11 @@ def build_killcams():
               <div class="panel-head"><h3>How cams work</h3></div>
               <div class="panel-body">
                 <div class="kc-meta" style="text-transform:none;letter-spacing:.02em;font-family:var(--font-body);font-size:13.5px;display:block;color:var(--muted)">
-                  <p style="margin:0 0 10px">The world records the five seconds before every
-                  wilderness kill &mdash; both fighters, every tick, every hit &mdash; and keeps
-                  your last twenty. Type <b style="color:var(--parch)">::killcams</b> in game to
-                  watch yours back.</p>
-                  <p style="margin:0">Cams land here automatically. One vote per viewer, and the
-                  board leads with whatever the league votes up.</p>
+                  <p style="margin:0 0 10px">The five seconds before every wilderness kill are
+                  recorded for both fighters &mdash; every tick and every hit. Your last twenty
+                  are kept; <b style="color:var(--parch)">::killcams</b> replays them in game.</p>
+                  <p style="margin:0">Cams post to this board automatically. One vote per viewer,
+                  and the board sorts by votes.</p>
                 </div>
               </div>
             </div>
@@ -1104,8 +1093,8 @@ def build_vote():
         </div>"""
 
     content = f"""
-    {page_hero("Support the league", "Vote for <em>RSPKL</em>",
-               "Help the league climb the toplists and pocket rewards for it. Every vote brings new players to the Wilderness.")}
+    {page_hero("Toplists", "Vote for <em>RSPKL</em>",
+               "Five toplists, a 12-hour cooldown each, and vote credits plus PKP for every vote.")}
     <section class="section">
       <div class="container">
         <div class="with-side">
@@ -1143,9 +1132,8 @@ def build_vote():
             <div class="panel rv">
               <div class="panel-head"><h3>Why vote?</h3></div>
               <div class="panel-body">
-                <p class="small muted"> toplists are how new players find the league. Higher rank
-                — more fresh blood in the Wilderness. Voting takes under a minute per site and
-                pays you every 12 hours.</p>
+                <p class="small muted">Toplist rank is the main source of new players. Each site
+                takes under a minute and pays out every 12 hours.</p>
               </div>
             </div>
           </div>
@@ -1162,7 +1150,7 @@ def build_vote():
 def build_itemlist():
     content = f"""
     {page_hero("Item database", "RSPKL <em>Item List</em>",
-               "Search by item name or ID to view its in-game stats. Browse the complete league item database.")}
+               "Search the league item database by name or ID to read an item's in-game stats.")}
     <section class="section">
       <div class="container">
         <div class="panel rv" style="margin-bottom:22px">
@@ -1206,7 +1194,7 @@ def build_droptable():
     )
     content = f"""
     {page_hero("Drop transparency", "Monster <em>Drop Tables</em>",
-               "Every rate in the league, published. Pick your rank to preview the exact drop rates you receive in-game.")}
+               "Published rates for every monster. Select a rank to see the exact rates it receives.")}
     <section class="section">
       <div class="container">
         {section_head("Drop-rate calculator", "Choose Your Rank")}
@@ -1277,8 +1265,8 @@ def build_staff():
     )
 
     content = f"""
-    {page_hero("The league office", "RSPKL <em>Staff List</em>",
-               "Meet the people who keep the league fair, welcoming and running smoothly — grouped by in-game rank.")}
+    {page_hero("The team", "RSPKL <em>Staff List</em>",
+               "The league staff, grouped by in-game rank.")}
     <section class="section">
       <div class="container">
         {section_head("Official staff team", "Our Team")}
@@ -1327,12 +1315,11 @@ def build_support():
         for q, a in faq_items
     )
     content = f"""
-    {page_hero("We have your back", "RSPKL <em>Support</em>",
-               "Choose the fastest way to reach the team. Account help, payments or a wild report — pick a channel.")}
+    {page_hero("Contact", "RSPKL <em>Support</em>",
+               "Four channels for accounts, payments and player reports: email, in-game ::staff, live chat and Discord.")}
     <section class="section">
       <div class="container">
-        {section_head("Support center", "How to Contact RSPKL",
-               "Select the option that best matches what you need.")}
+        {section_head("Support center", "How to Contact RSPKL")}
         <div class="support-grid">{cards_html}</div>
         <div class="safety-note">
           <i class="bi bi-shield-exclamation"></i>
@@ -1371,10 +1358,10 @@ def build_rules():
     )
     content = f"""
     {page_hero("League law", "RSPKL <em>Rules</em>",
-               "Ten rules keep the league competitive and fair. Ignorance is not a defence — read them once, then go skulled.")}
+               "Ten league rules, the punishment ladder that enforces them, and the legal policies.")}
     <section class="section">
       <div class="container">
-        {section_head("The golden rules", "Season Rulebook")}
+        {section_head("Season 1", "The Rulebook")}
         <ul class="rules-list rv">{rules_html}</ul>
 
         <div class="section-head" style="margin-top:54px">
@@ -1423,8 +1410,8 @@ def build_rules():
 # ============================================================ PROVABLY FAIR
 def build_provablyfair():
     content = f"""
-    {page_hero("Nothing up our sleeve", "Provably <em>Fair</em>",
-               "Every mystery box roll, duel stake and tournament draw in RSPKL is seeded, hashed and verifiable by you.")}
+    {page_hero("Verification", "Provably <em>Fair</em>",
+               "Every box roll, duel stake and tournament draw is seeded, hashed and verifiable by the player.")}
     <section class="section">
       <div class="container">
         {section_head("How it works", "The Seed Chain")}
@@ -1473,7 +1460,7 @@ def build_404():
       <div class="hero-inner">
         <div class="hero-kicker">Error 404</div>
         <h1 class="hero-title">Lost in the<span class="line-gold">Wilderness</span></h1>
-        <p class="hero-sub">This page got PKed. Teleport back to safety — the league is waiting.</p>
+        <p class="hero-sub">This page does not exist.</p>
         <div class="hero-actions">
           <a class="btn btn-gold btn-lg" href="/"><i class="bi bi-house"></i> BACK TO HOME</a>
           <a class="btn btn-outline btn-lg" href="/play/"><i class="bi bi-play-fill"></i> PLAY NOW</a>

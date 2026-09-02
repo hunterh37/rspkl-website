@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Item List — RSPKL Item Database | RuneScape PK League</title>
+  <meta name="description" content="Browse the RSPKL item database — search by name or ID, view every item in the league toolkit.">
+  <meta property="og:title" content="Item List — RSPKL Item Database | RuneScape PK League">
+  <meta property="og:description" content="Browse the RSPKL item database — search by name or ID, view every item in the league toolkit.">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="https://rspkl.com/assets/img/app-icon.png">
+  <meta name="theme-color" content="#c98f14">
+  <link rel="icon" type="image/png" href="/assets/img/favicon.png">
+  <link rel="apple-touch-icon" href="/assets/img/app-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="/assets/css/main.css">
+</head>
+<body>
+  <div class="notif-bar">
+    <div class="notif-inner">
+      <div class="notif-left">
+        <img class="sk" src="/assets/img/skull-gold.png" alt="">
+        <span>RSPKL SEASON 1 — GOLDEN SKULL TOURNAMENT IN <b id="notif-countdown" class="notif-count">—</b></span>
+      </div>
+      <div class="notif-right">
+        <span class="dot"></span>
+        <span><b class="js-players">1,284</b> REAL PLAYERS ONLINE</span>
+        <a href="/play/">JOIN THEM <i class="bi bi-chevron-right"></i></a>
+      </div>
+    </div>
+  </div>
+  
+    <header class="site-header">
+      <div class="nav-inner">
+        <a class="brand" href="/" aria-label="RSPKL home">
+          <img src="/assets/img/skull-gold.png" alt="RSPKL golden PK skull">
+          <span class="brand-mark">
+            <span class="over">Runescape</span>
+            <span class="main">PK <span>League</span></span>
+          </span>
+        </a>
+        <nav class="nav" aria-label="Primary">
+          <a class="nav-link" href="/">HOME</a><a class="nav-link" href="/play/">PLAY</a><a class="nav-link" href="/donate/">DONATE</a><a class="nav-link" href="/hiscore/">HISCORES</a><a class="nav-link" href="/download/">DOWNLOAD</a>
+          <div class="has-dropdown">
+            <a class="nav-link" href="/vote/">MORE <i class="bi bi-chevron-down" style="font-size:10px"></i></a>
+            <div class="dropdown"><a href="/vote/">Vote for a Reward</a><a href="/itemlist/">Item List</a><a href="/droptable/">Drop Table</a><div class="sep"></div><a href="/staff/">Staff List</a><a href="/support/">Support</a><a href="/rules/">Rules</a><a href="/provablyfair/">Provably Fair</a></div>
+          </div>
+          <div class="nav-cta">
+            <a class="btn btn-gold btn-sm" href="/play/">PLAY NOW <small style="font-size:9px;letter-spacing:.2em">· WEB CLIENT</small></a>
+          </div>
+        </nav>
+        <button class="burger" id="burger" aria-label="Menu"><i class="bi bi-list"></i></button>
+      </div>
+    </header>
+    <div class="mobile-nav" id="mobile-nav">
+      <a href="/">HOME</a><a href="/play/">PLAY</a><a href="/donate/">DONATE</a><a href="/hiscore/">HISCORES</a><a href="/download/">DOWNLOAD</a><a href="/vote/">Vote for a Reward</a><a href="/itemlist/">Item List</a><a href="/droptable/">Drop Table</a><a href="/staff/">Staff List</a><a href="/support/">Support</a><a href="/rules/">Rules</a><a href="/provablyfair/">Provably Fair</a>
+      <a class="btn btn-gold btn-block" href="/play/">PLAY NOW — WEB CLIENT</a>
+    </div>
+  <main>
+  
+    <div class="page-hero">
+      <img class="wm" src="/assets/img/skull-gold.png" alt="">
+      <div class="kicker">Item database</div>
+      <h1>RSPKL <em>Item List</em></h1>
+      <p class="sub">Search by item name or ID to view its in-game stats. Browse the complete league item database.</p>
+    </div>
+    <section class="section">
+      <div class="container">
+        <div class="panel rv" style="margin-bottom:22px">
+          <div class="panel-head"><h3>Find an item</h3><div class="r" id="item-count">— ITEMS</div></div>
+          <div class="panel-body">
+            <form id="item-search" style="display:flex;gap:10px;flex-wrap:wrap">
+              <input class="input" id="item-query" style="flex:1;min-width:220px" placeholder="Search items by name or ID">
+              <button class="btn btn-gold" type="submit"><i class="bi bi-search"></i> SEARCH</button>
+            </form>
+          </div>
+        </div>
+        <div class="panel rv">
+          <div class="panel-head"><h3>Item browser</h3><div class="r">Toolkit · all game items</div></div>
+          <div class="panel-body">
+            <div class="item-grid" id="item-grid"></div>
+            <div class="pager" id="item-pager"></div>
+          </div>
+        </div>
+        <div class="note-strip">
+          <i class="bi bi-database"></i>
+          <span>Sample database slice — the full 24,000+ item index loads from the league
+          cache when Season 1 opens.</span>
+        </div>
+      </div>
+    </section>
+  </main>
+  
+    <section class="section-tight">
+      <div class="container">
+        <div class="cta-band rv">
+          <img class="wm" src="/assets/img/skull-gold.png" alt="">
+          <div class="kicker">The #1 PK League</div>
+          <h2>Ready to enter <span class="gold">the League?</span></h2>
+          <p>RSPKL is community-driven and supported. The league runs on player support —
+          vote daily, gear up in the shop, and climb the divisions.</p>
+          <div class="btns">
+            <a class="btn btn-gold btn-lg" href="/play/">PLAY NOW</a>
+            <a class="btn btn-outline btn-lg js-soon" data-soon="Discord" href="#">JOIN DISCORD</a>
+          </div>
+        </div>
+      </div>
+    </section>
+    <footer class="site-footer">
+      <div class="container">
+        <div class="footer-cta">
+          <div class="t">Season 1 — The Golden Skull</div>
+          <div class="btns">
+            <a class="btn btn-gold" href="/play/"><i class="bi bi-play-fill"></i> PLAY NOW</a>
+            <a class="btn btn-outline js-soon" data-soon="Discord" href="#"><i class="bi bi-discord"></i> JOIN DISCORD</a>
+          </div>
+        </div>
+        <div class="footer-grid"><div><div class="footer-head">RSPKL</div><a class="footer-link" href="/play/">Play in Browser<i class="bi bi-chevron-right"></i></a><a class="footer-link" href="/hiscore/">Hiscores<i class="bi bi-chevron-right"></i></a><a class="footer-link" href="/download/">Download<i class="bi bi-chevron-right"></i></a><a class="footer-link js-soon" data-soon="Forum" href="#">Forum<i class="bi bi-chevron-right"></i></a></div><div><div class="footer-head">Account</div><a class="footer-link" href="/register/">Register<i class="bi bi-chevron-right"></i></a><a class="footer-link" href="/donate/">Donate<i class="bi bi-chevron-right"></i></a><a class="footer-link" href="/vote/">Vote for a Reward<i class="bi bi-chevron-right"></i></a><a class="footer-link" href="/support/#recovery">Account Recovery<i class="bi bi-chevron-right"></i></a></div><div><div class="footer-head">Resources</div><a class="footer-link" href="/itemlist/">Item List<i class="bi bi-chevron-right"></i></a><a class="footer-link" href="/droptable/">Drop Table<i class="bi bi-chevron-right"></i></a><a class="footer-link" href="/rules/">Rules<i class="bi bi-chevron-right"></i></a><a class="footer-link" href="/provablyfair/">Provably Fair<i class="bi bi-chevron-right"></i></a><a class="footer-link js-soon" data-soon="Wiki" href="#">Wiki<i class="bi bi-chevron-right"></i></a></div><div><div class="footer-head">Support</div><a class="footer-link" href="/support/">Contact Us<i class="bi bi-chevron-right"></i></a><a class="footer-link" href="mailto:support@rspkl.com">Email Support<i class="bi bi-chevron-right"></i></a><a class="footer-link js-soon" data-soon="Discord" href="#">Discord Support<i class="bi bi-chevron-right"></i></a><a class="footer-link" href="/staff/">Staff List<i class="bi bi-chevron-right"></i></a><a class="footer-link" href="/support/#report">Report a Problem<i class="bi bi-chevron-right"></i></a></div></div>
+        <div class="footer-bottom">
+          <div>&copy; <span class="js-year">2026</span> RUNESCAPE PK LEAGUE — All Rights Reserved.</div>
+          <div class="lang"><i class="bi bi-globe2"></i>
+            <select aria-label="Language">
+              <option value="en" selected>🇺🇸 English</option>
+              <option value="es">🇪🇸 Español</option>
+            </select>
+          </div>
+          <div class="legal">
+            <a href="/rules/#terms">Terms of Service</a>
+            <a href="/rules/#privacy">Privacy Policy</a>
+            <a href="/rules/#refund">Refund Policy</a>
+          </div>
+        </div>
+      </div>
+    </footer>
+    <div class="overlay" id="overlay"></div>
+    <aside class="cart-drawer" id="cart-drawer" aria-label="Cart">
+      <div class="cart-head">
+        <h3><i class="bi bi-trophy"></i> Your Cart</h3>
+        <button class="cart-close" id="cart-close" aria-label="Close cart"><i class="bi bi-x-lg"></i></button>
+      </div>
+      <div class="cart-items">
+        <div id="cart-items"></div>
+        <p class="cart-empty" id="cart-empty">Your cart is empty — head to the shop.</p>
+      </div>
+      <div class="cart-foot">
+        <div class="cart-total">TOTAL <b id="cart-total">$0.00 USD</b></div>
+        <button class="btn btn-gold btn-block" id="cart-checkout">SECURE CHECKOUT</button>
+        <span class="btn-note">Checkout activates with Season 1</span>
+      </div>
+    </aside>
+    <button class="cart-fab" id="cart-fab"><i class="bi bi-trophy"></i> CART <span class="n" id="cart-count">0</span></button>
+    <div class="toast" id="toast" role="status"></div>
+    <script src="/assets/js/main.js"></script>
+  <script src="/assets/js/itemlist.js"></script>
+</body>
+</html>

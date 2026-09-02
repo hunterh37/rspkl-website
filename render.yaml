@@ -1,0 +1,60 @@
+services:
+  # ---- 1. Static marketing site (launch now) ----
+  - type: web
+    name: rspkl-website
+    runtime: static
+    repo: https://github.com/hunterh37/rspkl-website
+    branch: main
+    autoDeploy: true
+    staticPublishPath: ./
+
+    # slashless URLs -> trailing slash (Render serves folder/index.html)
+    routes:
+      - type: redirect
+        source: /play
+        destination: /play/
+      - type: redirect
+        source: /download
+        destination: /download/
+      - type: redirect
+        source: /register
+        destination: /register/
+      - type: redirect
+        source: /donate
+        destination: /donate/
+      - type: redirect
+        source: /hiscore
+        destination: /hiscore/
+      - type: redirect
+        source: /vote
+        destination: /vote/
+      - type: redirect
+        source: /itemlist
+        destination: /itemlist/
+      - type: redirect
+        source: /droptable
+        destination: /droptable/
+      - type: redirect
+        source: /staff
+        destination: /staff/
+      - type: redirect
+        source: /support
+        destination: /support/
+      - type: redirect
+        source: /rules
+        destination: /rules/
+      - type: redirect
+        source: /provablyfair
+        destination: /provablyfair/
+
+    headers:
+      - path: /assets/*
+        name: Cache-Control
+        value: public, max-age=31536000, immutable
+      - path: /*
+        name: X-Content-Type-Options
+        value: nosniff
+      - path: /*
+        name: Referrer-Policy
+        value: strict-origin-when-cross-origin
+

@@ -1,0 +1,15 @@
+{
+  "defsBytes": 622899,
+  "frameBytes": 7926865,
+  "frames": 2720,
+  "gfx": 2838,
+  "items": 26567,
+  "kits": 84,
+  "modelBytes": 6127886,
+  "models": 4416,
+  "seqs": 11465,
+  "shardBits": 9,
+  "shards": 73,
+  "skipped": 1,
+  "version": "a35fa0b418e5"
+}

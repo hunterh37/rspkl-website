@@ -1,7 +1,14 @@
-/* RSPKL Top Killcams — board, voting, and the replay player.
-   The player decodes KCP1 (the game's own cam format) and draws the fight on a
-   tile board. Nothing about a cam is re-derived here: every number on screen is
-   a field the world recorded at the moment of the kill. */
+/* RSPKL Top Killcams — the board, the vote, and the two ways to watch a cam.
+
+   A cam arrives from the API as the game's own KCP1 bytes and is decoded by
+   killcam-cam.js. From there it is drawn twice over: killcam-3d.js dresses both
+   fighters in the gear their appearance blocks describe and plays the
+   animations the fight played, and the tile board in this file draws the same
+   nine ticks as positions on a grid. The tile board is what a browser without
+   WebGL gets, and what anyone gets who would rather read a fight than watch it.
+
+   Nothing about a cam is re-derived here: every number on screen is a field the
+   world recorded at the moment of the kill. */
 (function () {
   'use strict';
 
@@ -17,87 +24,14 @@
     return n;
   }
 
-  // ---- KCP1 ---------------------------------------------------------------
-  // The single-cam form: uncompressed, one presence byte a frame. This mirrors
-  // KillcamCodec#decodeCam byte for byte, and is the only place on the site
-  // that knows the layout — the renderer below reads fields, never bytes.
+  // ---- decoding -----------------------------------------------------------
+  // The cam format and the appearance block inside it are decoded by
+  // killcam-cam.js, which is loaded ahead of this file and is also what the
+  // node tests read. One decoder, one grammar, one place a format change lands.
 
-  function Reader(bytes) { this.b = bytes; this.p = 0; }
-  Reader.prototype.u8 = function () { return this.b[this.p++]; };
-  Reader.prototype.s8 = function () { var v = this.b[this.p++]; return v > 127 ? v - 256 : v; };
-  Reader.prototype.u16 = function () { var v = (this.b[this.p] << 8) | this.b[this.p + 1]; this.p += 2; return v; };
-  Reader.prototype.u32 = function () {
-    var v = this.b[this.p] * 16777216 + (this.b[this.p + 1] << 16) + (this.b[this.p + 2] << 8) + this.b[this.p + 3];
-    this.p += 4;
-    return v;
-  };
+  var camApi = window.KillcamCam;
 
-  var BASE37 = '_abcdefghijklmnopqrstuvwxyz0123456789';
-
-  /* A username as the appearance block already carries it: base-37, most
-     significant character first. Decoded here so the card and the replay agree
-     on a name without the API having to send it twice. */
-  function nameFromLong(hi, lo) {
-    var out = '';
-    // Split across two 32-bit halves because JS numbers cannot hold a long.
-    var h = hi, l = lo;
-    while (h > 0 || l > 0) {
-      var rem = (h % 37) * 4294967296 + l;
-      var c = rem % 37;
-      out = BASE37.charAt(c) + out;
-      l = Math.floor(rem / 37);
-      h = Math.floor(h / 37);
-    }
-    out = out.replace(/_/g, ' ').trim();
-    return out ? out.charAt(0).toUpperCase() + out.slice(1) : '';
-  }
-
-  function readFrame(r) {
-    var f = r.u8();
-    // Absent fields read back as -1, which is what the Java decoder produces:
-    // the format spends no byte distinguishing "not facing anywhere" from the
-    // tile at -1,-1, and the renderer treats the pair as absent.
-    var out = { dx: 0, dy: 0, anim: -1, gfx: -1, gfxHeight: -1, damage: -1, hitType: -1, hp: -1, faceDx: -1, faceDy: -1 };
-    if (f & 0x01) { out.dx = r.s8(); out.dy = r.s8(); }
-    if (f & 0x02) { out.anim = r.u16(); }
-    if (f & 0x04) { out.gfx = r.u16(); out.gfxHeight = r.u8(); }
-    if (f & 0x08) { out.damage = r.u8(); out.hitType = r.u8(); }
-    if (f & 0x10) { out.hp = r.u8(); }
-    if (f & 0x20) { out.faceDx = r.s8(); out.faceDy = r.s8(); }
-    return out;
-  }
-
-  function readActor(r, frames) {
-    var hi = r.u32(), lo = r.u32();
-    var appearance = r.u8();
-    r.p += appearance;   // stage 2 parses this; the tile view has no use for it
-    var list = [];
-    for (var i = 0; i < frames; i++) { list.push(readFrame(r)); }
-    return { name: nameFromLong(hi, lo), frames: list };
-  }
-
-  function decodeCam(bytes) {
-    try {
-      var r = new Reader(bytes);
-      var cam = {
-        id: r.u32(), epochSeconds: r.u32(), baseX: r.u16(), baseY: r.u16(),
-        plane: r.u8(), wildernessLevel: r.u8(),
-        killerCombat: r.u8(), victimCombat: r.u8()
-      };
-      cam.weapon = r.u16() - 1;
-      cam.killingBlow = r.u8();
-      cam.hitpointsLeft = r.u8();
-      var frames = r.u8();
-      cam.killer = readActor(r, frames);
-      cam.victim = readActor(r, frames);
-      cam.frames = frames;
-      return cam;
-    } catch (e) {
-      // A cam that will not decode is a cam the site cannot show. The card
-      // stays, the player says so — the same posture the game takes.
-      return null;
-    }
-  }
+  function decodeCam(bytes) { return camApi.decodeCam(bytes); }
 
   function bytesFromBase64(b64) {
     var raw = window.atob(b64);
@@ -173,16 +107,11 @@
     this.raf = requestAnimationFrame(this.step);
   };
 
-  /* Where a fighter is at a fractional tick.
-     Movement is interpolated because a cam samples once a tick and a fighter
-     covers a whole tile in that tick: drawn discretely the fight teleports a
-     tile at a time, which reads as lag rather than as movement. */
+  /* Where a fighter is at a fractional tick. Interpolation and the rule about
+     tiles the cam never recorded both live in killcam-anim.js, so the board and
+     the 3D stage cannot disagree about where someone stood. */
   Player.prototype.at = function (actor, t) {
-    var i = Math.floor(t);
-    var a = actor.frames[Math.min(i, actor.frames.length - 1)];
-    var b = actor.frames[Math.min(i + 1, actor.frames.length - 1)];
-    var k = t - i;
-    return { x: a.dx + (b.dx - a.dx) * k, y: a.dy + (b.dy - a.dy) * k, frame: a };
+    return window.KillcamAnim.positionAt(actor.frames, t);
   };
 
   Player.prototype.draw = function () {
@@ -218,10 +147,14 @@
 
     var k = this.at(cam.killer, this.t);
     var v = this.at(cam.victim, this.t);
-    this.fighter(k, '#f5d97a', '#c98f14', toPx, cell, cam.killer.name, true);
-    this.fighter(v, '#e8776f', '#8f1d17', toPx, cell, cam.victim.name, false);
-    this.splats(k, toPx, cell);
-    this.splats(v, toPx, cell);
+    if (k) {
+      this.fighter(k, '#f5d97a', '#c98f14', toPx, cell, cam.killer.name, true);
+      this.splats(k, toPx, cell);
+    }
+    if (v) {
+      this.fighter(v, '#e8776f', '#8f1d17', toPx, cell, cam.victim.name, false);
+      this.splats(v, toPx, cell);
+    }
   };
 
   Player.prototype.trail = function (actor, color, toPx, cell) {
@@ -231,10 +164,14 @@
     ctx.globalAlpha = 0.28;
     ctx.lineWidth = Math.max(1.5, cell * 0.07);
     ctx.beginPath();
+    var started = false;
     for (var i = 0; i <= upto && i < actor.frames.length; i++) {
       var f = actor.frames[i];
+      // A tile the cam did not record is not a step anyone took, so the trail
+      // skips it rather than drawing a line off the board and back.
+      if (!window.KillcamAnim.onBoard(f)) { continue; }
       var x = toPx(f.dx), y = toPx(f.dy);
-      if (i === 0) { ctx.moveTo(x, y); } else { ctx.lineTo(x, y); }
+      if (!started) { ctx.moveTo(x, y); started = true; } else { ctx.lineTo(x, y); }
     }
     ctx.stroke();
     ctx.globalAlpha = 1;
@@ -505,15 +442,109 @@
 
   // ---- viewer -------------------------------------------------------------
 
+  /* Two players over one cam. `stage` is the 3D one and owns the fight when
+     the browser can draw it; `player` is the tile board. Only one is on screen
+     at a time, and both are driven by the same scrub and the same play button,
+     so switching view mid-replay keeps the tick you were on. */
+  var stage = null;
+  var view = 'tiles';
+
+  function stageAvailable() {
+    return !!(window.KillcamStage && window.KillcamStage.supported() && window.KillcamAssets);
+  }
+
+  function current() { return view === '3d' && stage ? stage : player; }
+
+  /* Names, hitpoints and hitsplats over the 3D stage. Drawn as elements rather
+     than into the canvas because they are text, and because they then scale
+     with the page's own type rather than with the model space. */
+  function overlay(readout) {
+    var host = $('#kc-overlay');
+    if (!host) { return; }
+    var html = '';
+    readout.forEach(function (f) {
+      if (!f.visible) { return; }
+      var bar = '';
+      if (f.hp >= 0) {
+        var cls = f.hp > 50 ? '' : (f.hp > 20 ? ' hurt' : ' dying');
+        bar = '<div class="kc-bar' + cls + '"><span style="width:' + f.hp + '%"></span></div>';
+      }
+      html += '<div class="kc-tag ' + f.key + '" style="left:' + f.x + '%;top:' + f.y + '%">' +
+              escapeHtml(f.name) + bar + '</div>';
+      if (f.damage >= 0) {
+        html += '<div class="kc-splat' + (f.damage === 0 ? ' miss' : '') +
+                '" style="left:' + f.x + '%;top:' + (f.y - 6) + '%">' +
+                (f.damage === 0 ? 'block' : f.damage) + '</div>';
+      }
+    });
+    host.innerHTML = html;
+  }
+
+  function escapeHtml(text) {
+    return String(text == null ? '' : text).replace(/[&<>"]/g, function (ch) {
+      return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[ch];
+    });
+  }
+
+  function showView(next) {
+    view = next;
+    var gl = $('#kc-gl'), tiles = $('#kc-canvas'), tags = $('#kc-overlay');
+    if (gl) { gl.hidden = next !== '3d'; }
+    if (tiles) { tiles.hidden = next === '3d'; }
+    if (tags) { tags.innerHTML = ''; }
+    var seg = $('#kc-view');
+    if (seg) {
+      Array.prototype.forEach.call(seg.children, function (b) {
+        b.classList.toggle('on', b.getAttribute('data-view') === next);
+      });
+    }
+    if (next === '3d' && stage) { stage.resize(); }
+    if (next === 'tiles' && player && player.cam) { player.resize(); player.draw(); }
+  }
+
+  /* What each fighter was wearing. The names come from the item definitions the
+     export ships, keyed by the ids in the appearance block - the same lookup
+     the replay does to find their models, so the list and the figure can never
+     disagree about what someone had on. */
+  function renderGear(cam) {
+    var host = $('#kc-gear');
+    if (!host || !window.KillcamAssets) { return; }
+    var sides = [
+      { key: 'killer', title: cam.killer.name || 'Killer', look: camApi.parseAppearance(cam.killer.appearanceBytes) },
+      { key: 'victim', title: cam.victim.name || 'Victim', look: camApi.parseAppearance(cam.victim.appearanceBytes) }
+    ];
+    var ids = [];
+    sides.forEach(function (side) {
+      if (!side.look) { return; }
+      Object.keys(side.look.items).forEach(function (slot) { ids.push(side.look.items[slot]); });
+    });
+    if (!ids.length) { host.innerHTML = ''; return; }
+
+    window.KillcamAssets.defs('items', ids).then(function (defs) {
+      host.innerHTML = sides.map(function (side) {
+        if (!side.look) { return ''; }
+        var rows = camApi.SLOTS.map(function (slot) {
+          var id = side.look.items[slot];
+          var def = id === undefined ? null : defs[id];
+          if (!def || !def[0]) { return ''; }
+          return '<li>' + escapeHtml(def[0]) + '<span>' + slot + '</span></li>';
+        }).join('');
+        var skull = side.look.skullIcon >= 0 ? '<li class="skull">Skulled<span>risk</span></li>' : '';
+        return '<div class="' + side.key + '"><h4>' + escapeHtml(side.title) +
+               ' &middot; lvl ' + side.look.combat + '</h4><ul>' + rows + skull + '</ul></div>';
+      }).join('');
+    }).catch(function () { host.innerHTML = ''; });
+  }
+
   function openViewer(id) {
     var card = state.cams.filter(function (c) { return c.id === id; })[0];
     if (!card) { return; }
     var modal = $('#kc-modal');
     modal.classList.add('open');
     document.body.style.overflow = 'hidden';
-    $('#kc-modal-title').innerHTML = '<b>' + card.killer + '</b> vs ' + card.victim;
+    $('#kc-modal-title').innerHTML = '<b>' + escapeHtml(card.killer) + '</b> vs ' + escapeHtml(card.victim);
     $('#kc-modal-stats').innerHTML =
-      '<span>' + card.weaponName + '</span><span>' + card.killingBlow + ' dmg killing blow</span>' +
+      '<span>' + escapeHtml(card.weaponName) + '</span><span>' + card.killingBlow + ' dmg killing blow</span>' +
       '<span>' + card.hitpointsLeft + '% hp left</span>' +
       '<span>Lvl ' + card.killerCombat + ' vs ' + card.victimCombat + '</span>' +
       '<span>Wilderness ' + card.wildernessLevel + '</span>';
@@ -521,14 +552,21 @@
     vb.setAttribute('data-vote', card.id);
     vb.classList.toggle('on', !!card.voted);
     vb.innerHTML = '<i class="bi bi-caret-up-fill"></i><b>' + card.votes + '</b>';
+    $('#kc-gear').innerHTML = '';
 
-    if (!player) { player = new Player($('#kc-canvas')); }
+    if (!player) {
+      player = new Player($('#kc-canvas'));
+      window.__killcamPlayer = player;
+    }
     var scrub = $('#kc-scrub');
-    player.onTick = function (t) { scrub.value = String(Math.round(t * 100)); };
+    var tick = function (t) { scrub.value = String(Math.round(t * 100)); };
+    player.onTick = tick;
 
+    var loading = $('#kc-loading');
     var show = function (cam) {
       if (!cam) {
         $('#kc-status').textContent = 'This replay could not be read.';
+        if (loading) { loading.hidden = true; }
         return;
       }
       $('#kc-status').textContent = cam.frames + ' ticks · ' +
@@ -536,11 +574,52 @@
       scrub.max = String((cam.frames - 1) * 100);
       scrub.value = '0';
       player.load(cam);
-      player.play();
+      renderGear(cam);
+
+      if (cam.sample || !stageAvailable()) {
+        // No WebGL, or no gzip stream to unpack the meshes with. The tile board
+        // is the whole viewer here rather than a placeholder for one.
+        showView('tiles');
+        if (loading) { loading.hidden = true; }
+        var seg = $('#kc-view');
+        if (seg) { seg.style.display = 'none'; }
+        player.play();
+        return;
+      }
+
+      showView('3d');
+      if (loading) { loading.hidden = false; }
+      if (!stage) {
+        stage = new window.KillcamStage.Stage($('#kc-gl'));
+        stage.overlay = overlay;
+        // Exposed so the browser test can look at the fight the page is
+        // actually drawing rather than at a screenshot of it.
+        window.__killcamStage = stage;
+      }
+      stage.onTick = tick;
+      stage.load(cam).then(function (built) {
+        if (loading) { loading.hidden = true; }
+        if (!built) {
+          // Both fighters failed to assemble - no gear, no meshes, nothing to
+          // dress. The cam is still a fight, so the tiles get it.
+          showView('tiles');
+          player.play();
+          return;
+        }
+        stage.play();
+      }).catch(function () {
+        if (loading) { loading.hidden = true; }
+        showView('tiles');
+        player.play();
+      });
     };
 
     if (card.sample || !state.live) {
-      show(sampleCam(card));
+      var sample = sampleCam(card);
+      // A sample cam has no appearance blocks - it is a drawing of a fight, not
+      // a recording of one - so there is nobody to dress and the tiles have it.
+      sample.sample = true;
+      show(sample);
       return;
     }
     $('#kc-status').textContent = 'Loading replay…';
@@ -551,6 +630,7 @@
 
   function closeViewer() {
     if (player) { player.pause(); }
+    if (stage) { stage.pause(); }
     $('#kc-modal').classList.remove('open');
     document.body.style.overflow = '';
   }
@@ -582,16 +662,42 @@
     var play = $('#kc-play');
     if (play) {
       play.addEventListener('click', function () {
-        if (!player || !player.cam) { return; }
-        if (player.playing) { player.pause(); play.innerHTML = '<i class="bi bi-play-fill"></i>'; }
-        else { player.play(); play.innerHTML = '<i class="bi bi-pause-fill"></i>'; }
+        var active = current();
+        if (!active || !active.cam) { return; }
+        if (active.playing) { active.pause(); play.innerHTML = '<i class="bi bi-play-fill"></i>'; }
+        else { active.play(); play.innerHTML = '<i class="bi bi-pause-fill"></i>'; }
       });
     }
     var scrub = $('#kc-scrub');
     if (scrub) {
       scrub.addEventListener('input', function () {
-        if (player) { player.seek(Number(scrub.value) / 100); }
+        var active = current();
+        if (active) { active.seek(Number(scrub.value) / 100); }
         if (play) { play.innerHTML = '<i class="bi bi-play-fill"></i>'; }
+      });
+    }
+    var views = $('#kc-view');
+    if (views) {
+      views.addEventListener('click', function (e) {
+        var button = e.target.closest('[data-view]');
+        if (!button) { return; }
+        var next = button.getAttribute('data-view');
+        if (next === view) { return; }
+        // Carry the tick across rather than restarting: the two views are two
+        // readings of one recording, and the moment you were looking at is the
+        // reason you switched.
+        var at = current() ? current().t : 0;
+        var running = current() && current().playing;
+        if (current()) { current().pause(); }
+        showView(next);
+        var active = current();
+        if (active && active.cam) {
+          active.seek(at);
+          if (running) { active.play(); }
+        }
+        if (play) {
+          play.innerHTML = running ? '<i class="bi bi-pause-fill"></i>' : '<i class="bi bi-play-fill"></i>';
+        }
       });
     }
     var form = $('#kc-search');
@@ -607,6 +713,7 @@
     });
     window.addEventListener('resize', function () {
       if (player && player.cam) { player.resize(); player.draw(); }
+      if (stage) { stage.resize(); }
     });
 
     fetchBoard();

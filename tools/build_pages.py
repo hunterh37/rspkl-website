@@ -6,6 +6,7 @@ static output committed to the repo, so hosting needs no build step.
 
 Run:  python3 website/tools/build_pages.py
 """
+import json
 import os
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -30,9 +31,8 @@ SKULL_RISK = '/assets/img/skull-risk.png'
 NAV_LINKS = [
     ("/", "HOME", "home"),
     ("/play/", "PLAY", "play"),
-    ("/donate/", "DONATE", "donate"),
     ("/hiscore/", "HISCORES", "hiscore"),
-    ("/download/", "DOWNLOAD", "download"),
+    ("/battles/", "BATTLES", "battles"),
 ]
 
 MORE_LINKS = [
@@ -82,7 +82,7 @@ def nav_html(active: str) -> str:
             <div class="dropdown">{more}</div>
           </div>
           <div class="nav-cta">
-            <a class="btn btn-gold btn-sm" href="/play/">PLAY NOW <small style="font-size:9px;letter-spacing:.2em">· WEB CLIENT</small></a>
+            <a class="btn btn-gold btn-sm" href="/play/">ENTER LEAGUE</a>
           </div>
         </nav>
         <button class="burger" id="burger" aria-label="Menu"><i class="bi bi-list"></i></button>
@@ -90,37 +90,27 @@ def nav_html(active: str) -> str:
     </header>
     <div class="mobile-nav" id="mobile-nav">
       {mobile}
-      <a class="btn btn-gold btn-block" href="/play/">PLAY NOW — WEB CLIENT</a>
+      <a class="btn btn-gold btn-block" href="/play/">ENTER LEAGUE</a>
     </div>"""
 
 
-def footer_html() -> str:
+def footer_html(include_cart: bool = False) -> str:
     cols = {
-        "RSPKL": [
-            ("/play/", "Play in Browser"),
+        "Compete": [
+            ("/play/", "Enter the League"),
             ("/hiscore/", "Hiscores"),
-            ("/download/", "Download"),
-            ("soon:Forum", "Forum"),
-        ],
-        "Account": [
-            ("/register/", "Register"),
-            ("/donate/", "Donate"),
-            ("/vote/", "Vote for a Reward"),
-            ("/support/#recovery", "Account Recovery"),
+            ("/battles/", "Battle Finder"),
         ],
         "Resources": [
             ("/itemlist/", "Item List"),
             ("/droptable/", "Drop Table"),
             ("/rules/", "Rules"),
             ("/provablyfair/", "Provably Fair"),
-            ("soon:Wiki", "Wiki"),
         ],
         "Support": [
             ("/support/", "Contact Us"),
             ("mailto:support@rspkl.com", "Email Support"),
-            ("soon:Discord", "Discord Support"),
             ("/staff/", "Staff List"),
-            ("/support/#report", "Report a Problem"),
         ],
     }
     grid = ""
@@ -134,40 +124,30 @@ def footer_html() -> str:
         )
         grid += f'<div><div class="footer-head">{head}</div>{lis}</div>'
 
-    return f"""
-    <section class="section-tight">
-      <div class="container">
-        <div class="cta-band rv">
-          <img class="wm" src="{SKULL}" alt="">
-          <div class="kicker">The #1 PK League</div>
-          <h2>Ready to enter <span class="gold">the League?</span></h2>
-          <p>RSPKL is community-driven and supported. The league runs on player support —
-          vote daily, gear up in the shop, and climb the divisions.</p>
-          <div class="btns">
-            <a class="btn btn-gold btn-lg" href="/play/">PLAY NOW</a>
-            <a class="btn btn-outline btn-lg js-soon" data-soon="Discord" href="#">JOIN DISCORD</a>
-          </div>
-        </div>
+    cart = f"""
+    <div class="overlay" id="overlay"></div>
+    <aside class="cart-drawer" id="cart-drawer" aria-label="Cart">
+      <div class="cart-head">
+        <h3><i class="bi bi-trophy"></i> Your Cart</h3>
+        <button class="cart-close" id="cart-close" aria-label="Close cart"><i class="bi bi-x-lg"></i></button>
       </div>
-    </section>
+      <div class="cart-items"><div id="cart-items"></div><p class="cart-empty" id="cart-empty">Your cart is empty.</p></div>
+      <div class="cart-foot">
+        <div class="cart-total">TOTAL <b id="cart-total">$0.00 USD</b></div>
+        <button class="btn btn-gold btn-block" id="cart-checkout">SECURE CHECKOUT</button>
+      </div>
+    </aside>
+    <button class="cart-fab" id="cart-fab"><i class="bi bi-trophy"></i> CART <span class="n" id="cart-count">0</span></button>""" if include_cart else ""
+
+    return f"""
     <footer class="site-footer">
       <div class="container">
         <div class="footer-cta">
-          <div class="t">Season 1 — The Golden Skull</div>
-          <div class="btns">
-            <a class="btn btn-gold" href="/play/"><i class="bi bi-play-fill"></i> PLAY NOW</a>
-            <a class="btn btn-outline js-soon" data-soon="Discord" href="#"><i class="bi bi-discord"></i> JOIN DISCORD</a>
-          </div>
+          <div class="t">RSPKL <span>· Competitive Old School PvP</span></div>
         </div>
         <div class="footer-grid">{grid}</div>
         <div class="footer-bottom">
           <div>&copy; <span class="js-year">2026</span> RUNESCAPE PK LEAGUE — All Rights Reserved.</div>
-          <div class="lang"><i class="bi bi-globe2"></i>
-            <select aria-label="Language">
-              <option value="en" selected>🇺🇸 English</option>
-              <option value="es">🇪🇸 Español</option>
-            </select>
-          </div>
           <div class="legal">
             <a href="/rules/#terms">Terms of Service</a>
             <a href="/rules/#privacy">Privacy Policy</a>
@@ -176,29 +156,48 @@ def footer_html() -> str:
         </div>
       </div>
     </footer>
-    <div class="overlay" id="overlay"></div>
-    <aside class="cart-drawer" id="cart-drawer" aria-label="Cart">
-      <div class="cart-head">
-        <h3><i class="bi bi-trophy"></i> Your Cart</h3>
-        <button class="cart-close" id="cart-close" aria-label="Close cart"><i class="bi bi-x-lg"></i></button>
-      </div>
-      <div class="cart-items">
-        <div id="cart-items"></div>
-        <p class="cart-empty" id="cart-empty">Your cart is empty — head to the shop.</p>
-      </div>
-      <div class="cart-foot">
-        <div class="cart-total">TOTAL <b id="cart-total">$0.00 USD</b></div>
-        <button class="btn btn-gold btn-block" id="cart-checkout">SECURE CHECKOUT</button>
-        <span class="btn-note">Checkout activates with Season 1</span>
-      </div>
-    </aside>
-    <button class="cart-fab" id="cart-fab"><i class="bi bi-trophy"></i> CART <span class="n" id="cart-count">0</span></button>
+    {cart}
     <div class="toast" id="toast" role="status"></div>
     <script src="/assets/js/main.js"></script>"""
 
 
+def killcam_version() -> str:
+    """The version of the exported kill cam assets, if they are present.
+
+    Every asset under /assets/killcam is named by its own id and served with a
+    year-long immutable cache, so a re-export that changes what an id means
+    would otherwise be invisible to anyone who had already loaded it. The page
+    carries the version and the loader asks for ``?v=<version>``: a new export
+    is a new URL, an unchanged one is the same URL and the same cache hit.
+    """
+    path = os.path.join(ROOT, "assets", "killcam", "manifest.json")
+    try:
+        with open(path) as fh:
+            return str(json.load(fh).get("version", ""))
+    except (IOError, ValueError):
+        return ""
+
+
+def scripts(extra_js: str, module_js: str) -> str:
+    """Page scripts, in load order.
+
+    ``extra_js`` may name several files separated by spaces: the kill cam page
+    loads decoders that the replay, the board and the node tests all share, and
+    they have to be on the page before the module that uses them. ``module_js``
+    is loaded as an ES module, which is how three.js has to be imported; it is
+    deferred by definition, so it runs after the plain scripts regardless.
+    """
+    out = []
+    for src in extra_js.split():
+        out.append('<script src="%s"></script>' % (src if src.startswith("/") else "/" + src))
+    if module_js:
+        src = module_js if module_js.startswith("/") else "/" + module_js
+        out.append('<script type="module" src="%s"></script>' % src)
+    return "\n  ".join(out)
+
+
 def page(path: str, title: str, desc: str, active: str, content: str,
-          extra_js: str = "") -> None:
+          extra_js: str = "", module_js: str = "") -> None:
     full = f"""<!doctype html>
 <html lang="en">
 <head>
@@ -216,25 +215,12 @@ def page(path: str, title: str, desc: str, active: str, content: str,
   {FONTS}
 </head>
 <body>
-  <div class="notif-bar">
-    <div class="notif-inner">
-      <div class="notif-left">
-        <img class="sk" src="{SKULL}" alt="">
-        <span>RSPKL SEASON 1 — GOLDEN SKULL TOURNAMENT IN <b id="notif-countdown" class="notif-count">—</b></span>
-      </div>
-      <div class="notif-right">
-        <span class="dot"></span>
-        <span><b class="js-players">1,284</b> REAL PLAYERS ONLINE</span>
-        <a href="/play/">JOIN THEM <i class="bi bi-chevron-right"></i></a>
-      </div>
-    </div>
-  </div>
   {nav_html(active)}
   <main>
   {content}
   </main>
-  {footer_html()}
-  {f'<script src="{extra_js if extra_js.startswith("/") else "/" + extra_js}"></script>' if extra_js else ''}
+  {footer_html(include_cart=active == "donate")}
+  {scripts(extra_js, module_js)}
 </body>
 </html>
 """
@@ -327,170 +313,68 @@ def ladder_section() -> str:
 
 # ============================================================ HOME
 def build_home():
-    news = ""
-    items = [
-        ("news-art art-a", "Season 1: The Golden Skull Opens",
-         "September 1, 2026 12:00:00", "League Council",
-         "Season 1 of the PK League is live. Five divisions, placement matches, and a "
-         "250M PKP prize pool await. Step through the ::league portal to play your "
-         "placement bracket and claim your Golden Skull badge."),
-        ("news-art art-b", "Hybrid Tournament Series Announced",
-         "August 18, 2026 10:00:00", "League Council",
-         "Weekly hybrid tournaments begin with Season 1 — NH, Zerk and Max brackets every "
-         "Saturday. Winners take division points, exclusive capes and a place on the "
-         "Season trophy wall."),
-        ("news-art art-c", "Wilderness Rework: Bounty Tiers & Target Teleports",
-         "July 29, 2026 16:20:00", "League Council",
-         "The Wilderness gets league justice: bounty tiers with escalating PKP payouts, "
-         "target teleports to your hunter, and hotspots that rotate every 30 minutes. "
-         "Risk is back on the menu."),
-    ]
-    for art, h3, date, by, body in items:
-        news += f"""<article class="news-card rv">
-          <div class="{art}"><img class="wm" src="{SKULL}" alt=""></div>
-          <div class="news-body">
-            <div class="news-meta"><span><i class="bi bi-calendar3"></i> {date.split(' ')[0]}</span>
-            <span class="by"><i class="bi bi-person"></i> by {by}</span></div>
-            <h3>{h3}</h3>
-            <p>{body}</p>
-            <a class="read-more js-soon" data-soon="The full news archive" href="#">READ MORE <i class="bi bi-arrow-right"></i></a>
-          </div>
-        </article>"""
-
-    forum_items = [
-        ("How do I climb out of Div 3?", "Sep 01, 2026 20:37", "Hybrid King"),
-        ("Best inventory for NH brackets?", "Aug 29, 2026 11:04", "Ice Barrage"),
-        ("Season 1 prize pool breakdown", "Aug 26, 2026 09:41", "League Council"),
-        ("Clips: Golden Skull ace @ 30 wild", "Aug 23, 2026 17:11", "Gold Skull Gus"),
-        ("Placement matches — how they work", "Aug 20, 2026 07:16", "TankBrid"),
-    ]
-    forum = "".join(
-        f"""<div class="forum-item">
-          <i class="bi bi-chat-left-text forum-ic"></i>
-          <div><b class="js-soon" data-soon="The forum" style="cursor:pointer">{t}</b>
-          <time>{d} · by {b}</time></div>
+    tiers = "".join(
+        f"""<div class="tier t-{key}">
+          <span class="crest" aria-hidden="true"><i></i></span>
+          <b class="tier-name">{name}</b>
+          <span class="tier-elo">{elo}</span>
         </div>"""
-        for t, d, b in forum_items
+        for key, name, elo, _ in TIERS
     )
-
-    quick = "".join(
-        f"""<a class="quick-link rv" href="{href}"><span class="q-ic"><i class="bi bi-{ic}"></i></span>{label}<i class="bi bi-arrow-up-right"></i></a>"""
-        for href, ic, label in [
-            ("/rules/", "shield-check", "Rules"),
-            ("/itemlist/", "box-seam", "Item List"),
-            ("/droptable/", "table", "Drop Table"),
-            ("/hiscore/", "trophy", "Hiscores"),
-        ]
+    cards = "".join(
+        f"""<article class="elo-card rv">
+          <span class="elo-n">{n}</span>
+          <h3>{title}</h3>
+          <p>{body}</p>
+        </article>"""
+        for n, title, body in ELO_CARDS
     )
 
     content = f"""
-    <div class="hero">
+    <div class="hero hero-competitive">
       <div class="hero-bg"></div>
       <img class="hero-wm" src="{SKULL}" alt="">
       <div class="hero-inner">
-        <div class="hero-kicker">Old School · 317 · Elo-Ranked PvP</div>
-        <h1 class="hero-title">Prepare for the<span class="line-gold">PK League</span></h1>
-        <p class="hero-sub">Elo-ranked Old School PvP. Ten placement fights seed your rating,
-        then you climb Bronze to Dragon across five divisions &mdash; weekly tournaments,
-        bounty tiers and a 250M PKP prize pool on the line.</p>
-        <div class="hero-actions">
-          <a class="btn btn-gold btn-lg" href="/play/"><i class="bi bi-play-fill"></i> WEB CLIENT</a>
-          <a class="btn btn-outline btn-lg" href="/play/#mobile"><i class="bi bi-phone"></i> MOBILE CLIENT</a>
-          <a class="btn btn-outline btn-lg" href="/download/"><i class="bi bi-download"></i> DOWNLOAD</a>
-          <a class="btn btn-outline btn-lg js-soon" data-soon="Discord" href="#"><i class="bi bi-discord"></i> JOIN DISCORD</a>
+        <div class="season-banner" aria-label="Countdown to RSPKL Season 1">
+          <div class="season-banner-title">
+            <span class="season-number">S1</span>
+            <span><b>RuneScape PvP Ranked Ladder</b><small>Season 1 opens September 15 · 18:00 UTC</small></span>
+          </div>
+          <div class="season-countdown" aria-live="polite">
+            <span><b class="js-cd-d">00</b><small>Days</small></span><i>:</i>
+            <span><b class="js-cd-h">00</b><small>Hrs</small></span><i>:</i>
+            <span><b class="js-cd-m">00</b><small>Min</small></span><i>:</i>
+            <span><b class="js-cd-s">00</b><small>Sec</small></span>
+          </div>
         </div>
-        <div class="hero-stats">
-          <span class="pill pill-gold">Season 1 · Sept 18</span>
-          <span class="pill"><span class="dot"></span> <b class="js-players" style="color:var(--gold)">1,284</b> players online</span>
-          <span class="pill">Elo ranked · Bronze &rarr; Dragon</span>
-          <span class="pill">5 Divisions · 250M PKP prize pool</span>
+        <div class="hero-kicker"><span class="live-mark"></span> Old School combat · Skill-based Elo</div>
+        <h1 class="hero-title">Rule <span class="line-gold">the ladder.</span></h1>
+        <p class="hero-sub">Ten placement fights set your rating. Every fight after that
+        moves you through five competitive divisions—from Bronze to Dragon.</p>
+        <div class="hero-actions">
+          <a class="btn btn-gold btn-lg" href="/play/"><i class="bi bi-crosshair"></i> ENTER THE LEAGUE</a>
+          <a class="hero-text-link" href="/hiscore/">VIEW THE LADDER <i class="bi bi-arrow-right"></i></a>
+        </div>
+        <div class="hero-ranks" aria-label="Ranked divisions from Bronze to Dragon">
+          <div class="hero-ranks-head"><span>Ranked divisions</span><span>Elo progression</span></div>
+          <div class="ladder-rail">{tiers}</div>
         </div>
       </div>
-      <div class="scroll-cue">Scroll for more</div>
     </div>
 
-    <section class="section">
+    <section class="section ranked-system" id="ranked">
       <div class="container">
-        {section_head("Choose your arena", "Play Anywhere, Instantly", "No download required. The league comes to your browser, phone or desktop.")}
-        <div class="client-grid">
-          <a class="client-card rv" href="/play/">
-            <img class="sk-mini" src="{SKULL_COIN}" alt="">
-            <h3>Web Client</h3><p>Play instantly in your browser</p>
-            <span class="btn btn-gold btn-sm">LAUNCH</span>
-          </a>
-          <a class="client-card rv" href="/play/#mobile">
-            <span class="glyph"><i class="bi bi-phone"></i></span>
-            <h3>Mobile Client</h3><p>Play instantly on your phone</p>
-            <span class="btn btn-outline btn-sm">LAUNCH</span>
-          </a>
-          <a class="client-card rv" href="/download/">
-            <span class="glyph"><i class="bi bi-download"></i></span>
-            <h3>Download</h3><p>Windows · macOS · Linux</p>
-            <span class="btn btn-outline btn-sm">GET THE CLIENT</span>
-          </a>
-          <a class="client-card rv js-soon" data-soon="Discord" href="#">
-            <span class="glyph"><i class="bi bi-discord"></i></span>
-            <h3>Join Discord</h3><p>News, brackets &amp; support</p>
-            <span class="btn btn-outline btn-sm">OPEN INVITE</span>
-          </a>
+        {section_head("The competitive system", "Built for the climb", "A transparent rating system. No vague tiers, no decorative ranks—just performance.")}
+        <div class="elo-grid">{cards}</div>
+        <div class="elo-formula rv">
+          <span>NEW ELO = ELO + <b>K</b> &times; (RESULT &minus; EXPECTED)</span>
+          <span>K <b>32</b></span>
+          <span>PLACEMENTS <b>64</b></span>
+          <span>RESET <b>SOFT</b></span>
         </div>
       </div>
     </section>
-
-{ladder_section()}
-
-    <section class="section" id="news">
-      <div class="container">
-        {section_head("League dispatch", "The Latest News from RSPKL", "Season updates, tournament results and wilderness intel.")}
-        <div class="home-grid">
-          <div class="news-stack">{news}
-            <div class="text-center"><a class="btn btn-outline js-soon" data-soon="The full news archive" href="#">READ MORE NEWS</a></div>
-          </div>
-          <aside>
-            <div class="side-card spotlight rv">
-              <h3>Media Spotlight</h3>
-              <img src="{SKULL}" alt="Golden PK skull">
-              <p>Clip your aces. Season highlight reels air on the league channel every week.</p>
-              <a class="btn btn-gold btn-sm js-soon" data-soon="YouTube highlights" href="#">WATCH HIGHLIGHTS</a>
-            </div>
-            <div class="side-card rv">
-              <h3>Follow the League</h3>
-              <div class="social-row"><span class="social-ic"><i class="bi bi-discord"></i></span>
-                <div class="social-copy"><b>Discord</b><span>Brackets, support &amp; pings</span></div>
-                <i class="bi bi-arrow-up-right"></i></div>
-              <div class="social-row"><span class="social-ic"><i class="bi bi-youtube"></i></span>
-                <div class="social-copy"><b>YouTube</b><span>Highlights &amp; guides</span></div>
-                <i class="bi bi-arrow-up-right"></i></div>
-              <div class="social-row"><span class="social-ic"><i class="bi bi-instagram"></i></span>
-                <div class="social-copy"><b>Instagram</b><span>Clips &amp; art drops</span></div>
-                <i class="bi bi-arrow-up-right"></i></div>
-            </div>
-            <div class="side-card rv">
-              <h3>Forum Activity</h3>
-              {forum}
-            </div>
-          </aside>
-        </div>
-      </div>
-    </section>
-
-    <section class="section">
-      <div class="container">
-        {section_head("Everything in one place", "Quick Links")}
-        <div class="quick-grid">{quick}</div>
-      </div>
-    </section>
-
-    <section class="section-tight">
-      <div class="container">
-        <div class="stat-strip rv">
-          <div class="stat"><div class="v">5</div><div class="k">Ranked divisions</div></div>
-          <div class="stat"><div class="v">42</div><div class="k">Wilderness hotspots</div></div>
-          <div class="stat"><div class="v">10</div><div class="k">Placement fights</div></div>
-          <div class="stat"><div class="v">99.9%</div><div class="k">League uptime</div></div>
-        </div>
-      </div>
-    </section>"""
+    """
 
     page("index.html", "RuneScape PK League — The #1 PvP League",
          "RSPKL — competitive Old School PvP. Five divisions, weekly hybrid tournaments, "
@@ -1097,6 +981,12 @@ def build_killcams():
     is baked into this page: the markup is a shell for the board, the viewer
     and the vote, and every number on it comes from a field the world recorded
     at the moment of the kill.
+
+    The stage holds two canvases. The 3D one draws both fighters in the gear
+    their appearance blocks describe, playing the animations the fight played;
+    the tile one is the same cam as positions on a grid, and is what a browser
+    without WebGL or without a gzip stream gets. Neither is a fallback for a
+    missing cam - they are two readings of the same nine ticks.
     """
     content = f"""
     {page_hero("Replays", "Top <em>Killcams</em>",
@@ -1153,16 +1043,26 @@ def build_killcams():
       </div>
     </section>
 
-    <div class="kc-modal" id="kc-modal" role="dialog" aria-modal="true" aria-label="Killcam replay">
+    <div class="kc-modal" id="kc-modal" role="dialog" aria-modal="true"
+         aria-label="Killcam replay" data-assets="{killcam_version()}">
       <div class="kc-frame">
         <div class="kc-frame-head">
           <h3 id="kc-modal-title">Killcam</h3>
           <div class="kc-head-tools">
+            <div class="seg" id="kc-view">
+              <button class="on" data-view="3d">3D</button>
+              <button data-view="tiles">Tiles</button>
+            </div>
             <button class="kc-vote" id="kc-modal-vote" data-vote=""></button>
             <button id="kc-close" aria-label="Close replay"><i class="bi bi-x-lg"></i></button>
           </div>
         </div>
-        <div class="kc-stage"><canvas id="kc-canvas" width="620" height="620"></canvas></div>
+        <div class="kc-stage" id="kc-stage">
+          <canvas id="kc-gl"></canvas>
+          <canvas id="kc-canvas" width="620" height="620" hidden></canvas>
+          <div class="kc-overlay" id="kc-overlay"></div>
+          <div class="kc-loading" id="kc-loading">Loading the fight&hellip;</div>
+        </div>
         <div class="kc-controls">
           <button id="kc-play" aria-label="Play or pause"><i class="bi bi-pause-fill"></i></button>
           <input type="range" id="kc-scrub" min="0" max="800" value="0" step="1"
@@ -1172,15 +1072,19 @@ def build_killcams():
         <div class="kc-legend">
           <span><i class="kc-dot-k"></i> Killer</span>
           <span><i class="kc-dot-v"></i> Victim</span>
-          <span>Ring = attack &middot; wedge = facing &middot; 1 tile = 1 square</span>
+          <span>Drag to orbit &middot; scroll to zoom &middot; 1 tile = 1 square</span>
         </div>
         <div class="kc-frame-stats" id="kc-modal-stats"></div>
+        <div class="kc-gear" id="kc-gear"></div>
       </div>
     </div>"""
     page("killcams/index.html", "Top Killcams — RSPKL Replays | RuneScape PK League",
          "Watch the top RSPKL killcams — the last five seconds of every wilderness kill, "
          "replayed tick by tick, and voted on by the league.", "killcams", content,
-         extra_js="assets/js/killcams.js")
+         extra_js=("assets/js/killcam-mesh.js assets/js/killcam-cam.js "
+                   "assets/js/killcam-anim.js assets/js/killcam-figure.js "
+                   "assets/js/killcam-assets.js assets/js/killcams.js"),
+         module_js="assets/js/killcam-3d.js")
 
 
 # ============================================================ VOTE

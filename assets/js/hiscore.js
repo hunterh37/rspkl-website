@@ -72,7 +72,37 @@
   var state = { board: 'kills', mode: 'normal', page: 1, query: '' };
   var PER = 25;
 
+  // live rows from the API for the current view; null = use sample data
+  var live = null;
+  var liveKey = null;
+  var reqSeq = 0;
+
   function data() { return build(state.mode); }
+
+  function viewKey() {
+    return [state.board, state.mode, state.page, state.query].join('|');
+  }
+
+  // GET /api/hiscores?board=&mode=&page=&q= ; on any failure the sample ladder stays
+  function fetchLive() {
+    if (typeof window.rspklApi !== 'function') { return; }
+    var key = viewKey();
+    var seq = ++reqSeq;
+    var qs = '/api/hiscores?board=' + encodeURIComponent(state.board) +
+             '&mode=' + encodeURIComponent(state.mode) +
+             '&page=' + state.page +
+             (state.query ? '&q=' + encodeURIComponent(state.query) : '');
+    window.rspklApi(qs).then(function (d) {
+      if (seq !== reqSeq || !d || !Array.isArray(d.rows)) { return; }
+      live = d;
+      liveKey = key;
+      render();
+    }).catch(function () {
+      if (seq !== reqSeq) { return; }
+      live = null;
+      liveKey = null;
+    });
+  }
 
   function currentBoard() {
     return BOARDS.filter(function (b) { return b.id === state.board; })[0] || BOARDS[0];
@@ -91,6 +121,13 @@
 
   function render() {
     var board = currentBoard();
+
+    // live path: the API already ranked, filtered and paged this view
+    if (live && liveKey === viewKey()) {
+      renderRows(board, live.rows.map(normalizeRow), live.pages, live.rows.length ? live.rows[0].rank : 1);
+      return;
+    }
+
     var rows = data();
     if (state.query) {
       var q = state.query.toLowerCase();
@@ -100,12 +137,34 @@
     var pages = Math.max(1, Math.ceil(rows.length / PER));
     if (state.page > pages) { state.page = 1; }
     var slice = rows.slice((state.page - 1) * PER, state.page * PER);
+    renderRows(board, slice, pages, (state.page - 1) * PER + 1);
+  }
 
+  // fills numeric fields the sample renderer assumes are always present
+  function normalizeRow(r) {
+    return {
+      name: r.name,
+      kills: r.kills || 0,
+      deaths: r.deaths || 0,
+      kdr: typeof r.kdr === 'number' ? r.kdr : 0,
+      elo: r.elo || 0,
+      streak: r.streak || 0,
+      best: r.best || 0,
+      total: r.total || 0,
+      slayer: r.slayer || 0,
+      lms: r.lms || 0,
+      log: r.log || 0,
+      mc: Array.isArray(r.mc) && r.mc.length ? r.mc : MONSTERS.map(function () { return 0; }),
+      value: r.value
+    };
+  }
+
+  function renderRows(board, slice, pages, firstRank) {
     var head = $('#hs-head'), body = $('#hs-body');
     var colsHtml = board.cols.map(function (c) { return '<th>' + c + '</th>'; }).join('');
     head.innerHTML = '<th>Rank</th><th>Username</th>' + colsHtml;
     body.innerHTML = slice.map(function (p, i) {
-      var rank = (state.page - 1) * PER + i + 1;
+      var rank = firstRank + i;
       var cls = rank === 1 ? 'r1' : rank === 2 ? 'r2' : rank === 3 ? 'r3' : '';
       var vals = board.get(p).map(function (v, ci) {
         return '<td class="' + (ci === board.cols.length - 1 && board.cols[ci] === 'KDR' ? 'kdr' : 'num') + '">' + v + '</td>';
@@ -127,6 +186,7 @@
         b.addEventListener('click', function () {
           state.page = parseInt(b.getAttribute('data-pg'), 10);
           render();
+          fetchLive();
         });
       });
     }
@@ -143,6 +203,7 @@
       state.page = 1;
       $$('.hs-cats a').forEach(function (x) { x.classList.toggle('on', x === a); });
       render();
+      fetchLive();
     });
   });
 
@@ -153,6 +214,7 @@
       state.mode = b.getAttribute('data-mode');
       state.page = 1;
       render();
+      fetchLive();
     });
   });
 
@@ -164,9 +226,11 @@
       state.query = $('#hs-query').value.trim();
       state.page = 1;
       render();
+      fetchLive();
       if (state.query) { rspklToast('Showing players matching "' + state.query + '".'); }
     });
   }
 
   render();
+  fetchLive();
 })();

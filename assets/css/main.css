@@ -240,6 +240,42 @@ h1,h2,h3,h4,.display{font-family:var(--font-display);font-weight:700;letter-spac
 .scroll-cue::after{content:"";width:1px;height:34px;background:linear-gradient(180deg,var(--gold-2),transparent);animation:cue 1.8s ease-in-out infinite}
 @keyframes cue{0%,100%{opacity:.25;transform:scaleY(.6)}50%{opacity:1;transform:scaleY(1)}}
 
+/* ---------- hero: giant countdown ---------- */
+.cd-wrap{margin:0 auto 34px}
+.cd-title{
+  font-family:var(--font-mono);font-size:11px;font-weight:600;letter-spacing:.34em;
+  text-transform:uppercase;color:var(--gold);margin-bottom:14px;
+}
+.cd-grid{display:flex;align-items:stretch;justify-content:center;gap:10px;flex-wrap:wrap}
+.cd-block{
+  min-width:118px;padding:18px 16px 14px;
+  background:linear-gradient(180deg,var(--panel-2),var(--panel));
+  border:1px solid var(--gold-3);border-radius:6px;
+  box-shadow:0 10px 34px rgba(0,0,0,.45),inset 0 1px 0 rgba(245,217,122,.14);
+}
+.cd-num{
+  display:block;font-family:var(--font-display);font-weight:900;
+  font-size:clamp(40px,6.5vw,64px);line-height:1;
+  background:linear-gradient(180deg,var(--gold-hi) 8%,var(--gold) 45%,var(--gold-2));
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  filter:drop-shadow(0 3px 14px rgba(201,143,20,.35));
+  font-variant-numeric:tabular-nums;
+}
+.cd-label{
+  display:block;margin-top:8px;
+  font-family:var(--font-mono);font-size:10px;font-weight:600;
+  letter-spacing:.26em;text-transform:uppercase;color:var(--muted);
+}
+.cd-sep{
+  align-self:center;font-family:var(--font-display);font-weight:900;
+  font-size:clamp(26px,4vw,40px);color:var(--gold-3);
+  animation:cue 1.8s ease-in-out infinite;
+}
+@media(max-width:640px){
+  .cd-block{min-width:74px;padding:12px 10px 10px}
+  .cd-sep{display:none}
+}
+
 /* ---------- home: client options ---------- */
 .client-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
 @media(max-width:980px){.client-grid{grid-template-columns:repeat(2,1fr)}}

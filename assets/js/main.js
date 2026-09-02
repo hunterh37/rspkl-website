@@ -5,12 +5,23 @@
 
   // ---- site config (RSPKL-API: replace with live endpoints when ready) ----
   var CFG = {
+    apiBase: 'https://rspkl-api.onrender.com', // '' to disable live data
     playersOnline: 1284,            // RSPKL-API: GET /api/players
-    seasonStart: '2026-09-18T18:00:00Z', // Season 1 opening
+    seasonStart: '2026-09-15T18:00:00Z', // Season 1 opening
     checkoutLive: false,            // flip true once Stripe checkout exists
     currency: 'USD'
   };
   window.RSPKL = CFG;
+
+  // ---- live API helper (falls back to CFG defaults when the API is down) ----
+  window.rspklApi = function (path) {
+    if (!CFG.apiBase) { return Promise.reject(new Error('api disabled')); }
+    return fetch(CFG.apiBase + path, { headers: { Accept: 'application/json' } })
+      .then(function (r) {
+        if (!r.ok) { throw new Error('HTTP ' + r.status); }
+        return r.json();
+      });
+  };
 
   // ---- helpers ----
   function $(s, c) { return (c || document).querySelector(s); }
@@ -34,25 +45,50 @@
     });
   }
 
-  // ---- notification bar: countdown + players online ----
+  // ---- countdowns: notif bar + hero giant countdown ----
   var cd = $('#notif-countdown');
-  if (cd) {
+  var cdD = $$('.js-cd-d'), cdH = $$('.js-cd-h'), cdM = $$('.js-cd-m'), cdS = $$('.js-cd-s');
+  if (cd || cdD.length) {
     var target = new Date(CFG.seasonStart).getTime();
+    function pad(n) { return (n < 10 ? '0' : '') + n; }
     function tick() {
       var d = target - Date.now();
-      if (d <= 0) { cd.textContent = 'LIVE NOW'; return; }
-      var h = Math.floor(d / 3600000);
+      var live = d <= 0;
+      var days = Math.floor(d / 86400000);
+      var h = Math.floor((d % 86400000) / 3600000);
       var m = Math.floor((d % 3600000) / 60000);
       var s = Math.floor((d % 60000) / 1000);
-      cd.textContent = (h > 23
-        ? Math.floor(h / 24) + 'D ' + (h % 24) + 'H ' + m + 'M'
-        : h + 'H ' + m + 'M ' + s + 'S');
+      if (cd) {
+        cd.textContent = live ? 'LIVE NOW' : (days
+          ? days + 'D ' + h + 'H ' + m + 'M'
+          : h + 'H ' + m + 'M ' + s + 'S');
+      }
+      cdD.forEach(function (el) { el.textContent = live ? '00' : pad(days); });
+      cdH.forEach(function (el) { el.textContent = live ? '00' : pad(h); });
+      cdM.forEach(function (el) { el.textContent = live ? '00' : pad(m); });
+      cdS.forEach(function (el) { el.textContent = live ? '00' : pad(s); });
     }
     tick(); setInterval(tick, 1000);
   }
-  $$('.js-players').forEach(function (el) {
-    el.textContent = CFG.playersOnline.toLocaleString('en-US');
-  });
+  function paintPlayers(n) {
+    $$('.js-players').forEach(function (el) {
+      el.textContent = Number(n).toLocaleString('en-US');
+    });
+  }
+  paintPlayers(CFG.playersOnline);
+
+  // live player count + season start (RSPKL-API)
+  function refreshLive() {
+    rspklApi('/api/status').then(function (d) {
+      if (typeof d.onlinePlayers === 'number' && d.worldUp) {
+        CFG.playersOnline = d.onlinePlayers;
+        paintPlayers(d.onlinePlayers);
+      }
+      if (d.seasonStart) { CFG.seasonStart = d.seasonStart; }
+    }).catch(function () { /* offline: keep sample values */ });
+  }
+  refreshLive();
+  setInterval(refreshLive, 60000);
 
   // ---- "launching soon" links (forum, wiki, discord, downloads) ----
   document.addEventListener('click', function (e) {

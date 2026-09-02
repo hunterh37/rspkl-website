@@ -36,6 +36,8 @@ NAV_LINKS = [
 ]
 
 MORE_LINKS = [
+    ("/battles/", "Battle Finder"),
+    ("/killcams/", "Top Killcams"),
     ("/vote/", "Vote for a Reward"),
     ("/itemlist/", "Item List"),
     ("/droptable/", "Drop Table"),
@@ -261,6 +263,68 @@ def page_hero(kicker: str, title: str, sub: str, wm: str = SKULL) -> str:
     </div>"""
 
 
+# ---------- ranked ladder (Bronze -> Dragon) ----------
+TIERS = [
+    ("bronze", "Bronze", "0 &ndash; 1199", "Entry"),
+    ("steel", "Steel", "1200 &ndash; 1499", "Top 66%"),
+    ("mith", "Mithril", "1500 &ndash; 1799", "Top 39%"),
+    ("rune", "Rune", "1800 &ndash; 2099", "Top 18%"),
+    ("drag", "Dragon", "2100+", "Top 5%"),
+]
+
+ELO_CARDS = [
+    ("01", "Ten to place",
+     "Ten placement fights seed your rating. Win them clean and you skip the "
+     "lower metals outright &mdash; nobody grinds up from Bronze who never "
+     "belonged there."),
+    ("02", "Every fight is rated",
+     "Rated duels and Wilderness kills move Elo both ways. Taking down a "
+     "higher-rated PKer pays more than farming one below you, so the ladder "
+     "cannot be climbed on easy targets."),
+    ("03", "Promotion &amp; grace",
+     "Cross a metal&rsquo;s ceiling and you promote on the spot. Drop below it "
+     "and you get a three-fight grace window to hold the line before the "
+     "crest changes."),
+]
+
+
+def ladder_section() -> str:
+    tiers = "".join(
+        f"""<div class="tier t-{key}">
+            <span class="crest" aria-hidden="true"><i></i></span>
+            <b class="tier-name">{name}</b>
+            <span class="tier-elo">{elo}</span>
+            <span class="tier-pop">{pop}</span>
+          </div>"""
+        for key, name, elo, pop in TIERS
+    )
+    cards = "".join(
+        f"""<div class="elo-card rv">
+            <span class="elo-n">{n}</span>
+            <h3>{title}</h3>
+            <p>{body}</p>
+          </div>"""
+        for n, title, body in ELO_CARDS
+    )
+    return f"""
+    <section class="section" id="ranked">
+      <div class="container">
+        {section_head("Ranked ladder",
+                      "Bronze to Dragon",
+                      "Five divisions, one rating. Your crest is not a cosmetic "
+                      "&mdash; it is the Elo you can defend.")}
+        <div class="ladder-rail rv">{tiers}</div>
+        <div class="elo-grid">{cards}</div>
+        <div class="elo-formula rv">
+          <span>NEW ELO = ELO + <b>K</b> &times; (RESULT &minus; EXPECTED)</span>
+          <span>K <b>32</b></span>
+          <span>PLACEMENTS <b>64</b></span>
+          <span>SEASON RESET <b>SOFT</b></span>
+        </div>
+      </div>
+    </section>"""
+
+
 # ============================================================ HOME
 def build_home():
     news = ""
@@ -324,11 +388,11 @@ def build_home():
       <div class="hero-bg"></div>
       <img class="hero-wm" src="{SKULL}" alt="">
       <div class="hero-inner">
-        <div class="hero-kicker">Old School · 317 · PvP-First</div>
+        <div class="hero-kicker">Old School · 317 · Elo-Ranked PvP</div>
         <h1 class="hero-title">Prepare for the<span class="line-gold">PK League</span></h1>
-        <p class="hero-sub">Join the most competitive Wilderness in the scene. Five divisions,
-        weekly tournaments, bounty tiers and a community that lives for the kill.
-        Your legend starts here.</p>
+        <p class="hero-sub">Elo-ranked Old School PvP. Ten placement fights seed your rating,
+        then you climb Bronze to Dragon across five divisions &mdash; weekly tournaments,
+        bounty tiers and a 250M PKP prize pool on the line.</p>
         <div class="hero-actions">
           <a class="btn btn-gold btn-lg" href="/play/"><i class="bi bi-play-fill"></i> WEB CLIENT</a>
           <a class="btn btn-outline btn-lg" href="/play/#mobile"><i class="bi bi-phone"></i> MOBILE CLIENT</a>
@@ -338,6 +402,7 @@ def build_home():
         <div class="hero-stats">
           <span class="pill pill-gold">Season 1 · Sept 18</span>
           <span class="pill"><span class="dot"></span> <b class="js-players" style="color:var(--gold)">1,284</b> players online</span>
+          <span class="pill">Elo ranked · Bronze &rarr; Dragon</span>
           <span class="pill">5 Divisions · 250M PKP prize pool</span>
         </div>
       </div>
@@ -371,6 +436,8 @@ def build_home():
         </div>
       </div>
     </section>
+
+{ladder_section()}
 
     <section class="section" id="news">
       <div class="container">
@@ -417,9 +484,9 @@ def build_home():
     <section class="section-tight">
       <div class="container">
         <div class="stat-strip rv">
-          <div class="stat"><div class="v">5</div><div class="k">Divisions</div></div>
+          <div class="stat"><div class="v">5</div><div class="k">Ranked divisions</div></div>
           <div class="stat"><div class="v">42</div><div class="k">Wilderness hotspots</div></div>
-          <div class="stat"><div class="v">10</div><div class="k">Ranked ladders</div></div>
+          <div class="stat"><div class="v">10</div><div class="k">Placement fights</div></div>
           <div class="stat"><div class="v">99.9%</div><div class="k">League uptime</div></div>
         </div>
       </div>
@@ -919,6 +986,203 @@ def build_hiscore():
          extra_js="assets/js/hiscore.js")
 
 
+# ============================================================ BATTLES
+def build_battles():
+    """The Battle Finder board and the fight-alert signup.
+
+    Two things on one page, because they are two halves of one intent: a
+    player looking at what is scheduled is exactly the player who wants
+    telling before it starts. Splitting them would put the signup on a page
+    nobody visits.
+
+    The board reads ``/api/battles?sort=hype`` - the high-value ordering, the
+    same one the in-game panel's Featured tab uses - and falls back to a
+    friendly empty state rather than an error, as the hiscores do.
+    """
+    content = f"""
+    {page_hero("Scheduled PvP", "The <em>Battle Finder</em>",
+               "Rated 1v1s on one ladder and three builds - Pure NH, Zerk NH, Main NH, "
+               "identical gear. Watch what is booked, then get told before it starts.")}
+    <section class="section">
+      <div class="container">
+        <div class="with-side">
+          <div class="panel rv">
+            <div class="panel-head">
+              <h3 id="bf-board-title">HIGH VALUE BATTLES</h3>
+              <div class="seg">
+                <button class="on" data-sort="hype">Biggest</button>
+                <button data-sort="time">Soonest</button>
+              </div>
+            </div>
+            <div class="panel-body tight">
+              <div class="table-wrap">
+                <table class="league-table">
+                  <thead><tr><th>Starts</th><th>Fight</th><th>Build</th><th>Rating</th><th>Status</th></tr></thead>
+                  <tbody id="bf-body"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+          <div class="side-col">
+            <div class="panel rv">
+              <div class="panel-head"><h3>Fight alerts</h3></div>
+              <div class="panel-body">
+                <p class="sub">Get a text or an email <b>5 minutes</b> and <b>1 minute</b>
+                before your next battle - even when you are logged out.</p>
+                <form id="bf-alerts">
+                  <div class="field">
+                    <label for="bf-user">In-game name</label>
+                    <input class="input" id="bf-user" placeholder="Your account name" maxlength="24">
+                  </div>
+                  <div class="field">
+                    <label for="bf-channel">Send it by</label>
+                    <div class="seg" id="bf-channel">
+                      <button type="button" class="on" data-channel="email">Email</button>
+                      <button type="button" data-channel="sms">Text</button>
+                    </div>
+                  </div>
+                  <div class="field">
+                    <label for="bf-address" id="bf-address-label">Email address</label>
+                    <input class="input" id="bf-address" placeholder="you@example.com">
+                  </div>
+                  <button class="btn btn-gold btn-block" type="submit">SEND ME A CODE</button>
+                </form>
+                <form id="bf-verify" style="display:none">
+                  <div class="field">
+                    <label for="bf-code">Six-digit code</label>
+                    <input class="input" id="bf-code" placeholder="000000" maxlength="6" inputmode="numeric">
+                  </div>
+                  <button class="btn btn-gold btn-block" type="submit">CONFIRM</button>
+                  <button class="btn btn-block" type="button" id="bf-restart">Start again</button>
+                </form>
+                <p class="sub" id="bf-alert-note"></p>
+              </div>
+            </div>
+            <div class="panel rv">
+              <div class="panel-head"><h3>How it works</h3></div>
+              <div class="panel-body hs-cats">
+                <div class="cat-group">
+                  <p class="cat-title">In game</p>
+                  <p class="sub"><b>::battles</b> opens the finder. Pick a build, queue, and
+                  you are paired with the closest rating waiting.</p>
+                </div>
+                <div class="cat-group">
+                  <p class="cat-title">Book ahead</p>
+                  <p class="sub">Post a battle with an open seat at a time you choose. It
+                  lands on this board for anyone to take.</p>
+                </div>
+                <div class="cat-group">
+                  <p class="cat-title">Rating</p>
+                  <p class="sub">Bronze through Dragon on the same ladder the Wilderness
+                  uses. Beating someone above you is worth more.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>"""
+    page("battles/index.html", "Battle Finder — RSPKL Scheduled PvP | RuneScape PK League",
+         "RSPKL Battle Finder - rated 1v1 battles on Pure NH, Zerk NH and Main NH builds, "
+         "the scheduled fight board, and 5-minute fight alerts by email or text.",
+         "battles", content, extra_js="assets/js/battles.js")
+
+
+# ============================================================ KILLCAMS
+def build_killcams():
+    """The Top Killcams board.
+
+    The cams themselves arrive from the API as the game's own KCP1 bytes and
+    are decoded and drawn by assets/js/killcams.js, so nothing about a replay
+    is baked into this page: the markup is a shell for the board, the viewer
+    and the vote, and every number on it comes from a field the world recorded
+    at the moment of the kill.
+    """
+    content = f"""
+    {page_hero("Replays", "Top <em>Killcams</em>",
+               "Every kill in the wilderness is recorded. Watch the last five seconds "
+               "back, and vote for the ones worth remembering.")}
+    <section class="section">
+      <div class="container">
+        <div class="with-side">
+          <div class="panel rv">
+            <div class="panel-head">
+              <h3>THE BOARD</h3>
+              <div class="seg" id="kc-sort">
+                <button class="on" data-sort="top">Most Voted</button>
+                <button data-sort="new">Newest</button>
+              </div>
+            </div>
+            <div class="panel-body tight">
+              <div class="kc-list" id="kc-list"></div>
+              <div class="pager" id="kc-pager"></div>
+            </div>
+          </div>
+          <div class="side-col">
+            <div class="panel rv">
+              <div class="panel-head"><h3>Find a fight</h3></div>
+              <div class="panel-body">
+                <form id="kc-search">
+                  <div class="field">
+                    <label for="kc-player-filter">Killer or victim</label>
+                    <input class="input" id="kc-player-filter" placeholder="Search players">
+                  </div>
+                  <button class="btn btn-gold btn-block" type="submit">SEARCH CAMS</button>
+                </form>
+              </div>
+            </div>
+            <div class="panel rv">
+              <div class="panel-head"><h3>How cams work</h3></div>
+              <div class="panel-body">
+                <div class="kc-meta" style="text-transform:none;letter-spacing:.02em;font-family:var(--font-body);font-size:13.5px;display:block;color:var(--muted)">
+                  <p style="margin:0 0 10px">The world records the five seconds before every
+                  wilderness kill &mdash; both fighters, every tick, every hit &mdash; and keeps
+                  your last twenty. Type <b style="color:var(--parch)">::killcams</b> in game to
+                  watch yours back.</p>
+                  <p style="margin:0">Cams land here automatically. One vote per viewer, and the
+                  board leads with whatever the league votes up.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="note-strip" id="kc-note">
+          <i class="bi bi-camera-reels"></i>
+          <span>Sample board &mdash; live cams start syncing from the world when Season 1 opens.</span>
+        </div>
+      </div>
+    </section>
+
+    <div class="kc-modal" id="kc-modal" role="dialog" aria-modal="true" aria-label="Killcam replay">
+      <div class="kc-frame">
+        <div class="kc-frame-head">
+          <h3 id="kc-modal-title">Killcam</h3>
+          <div class="kc-head-tools">
+            <button class="kc-vote" id="kc-modal-vote" data-vote=""></button>
+            <button id="kc-close" aria-label="Close replay"><i class="bi bi-x-lg"></i></button>
+          </div>
+        </div>
+        <div class="kc-stage"><canvas id="kc-canvas" width="620" height="620"></canvas></div>
+        <div class="kc-controls">
+          <button id="kc-play" aria-label="Play or pause"><i class="bi bi-pause-fill"></i></button>
+          <input type="range" id="kc-scrub" min="0" max="800" value="0" step="1"
+                 aria-label="Scrub through the replay">
+          <span id="kc-status">&mdash;</span>
+        </div>
+        <div class="kc-legend">
+          <span><i class="kc-dot-k"></i> Killer</span>
+          <span><i class="kc-dot-v"></i> Victim</span>
+          <span>Ring = attack &middot; wedge = facing &middot; 1 tile = 1 square</span>
+        </div>
+        <div class="kc-frame-stats" id="kc-modal-stats"></div>
+      </div>
+    </div>"""
+    page("killcams/index.html", "Top Killcams — RSPKL Replays | RuneScape PK League",
+         "Watch the top RSPKL killcams — the last five seconds of every wilderness kill, "
+         "replayed tick by tick, and voted on by the league.", "killcams", content,
+         extra_js="assets/js/killcams.js")
+
+
 # ============================================================ VOTE
 def build_vote():
     sites = ""
@@ -1318,8 +1582,9 @@ def build_404():
 
 
 def build_extras():
-    pages = ["", "play/", "download/", "register/", "donate/", "hiscore/", "vote/",
-             "itemlist/", "droptable/", "staff/", "support/", "rules/", "provablyfair/"]
+    pages = ["", "play/", "download/", "register/", "donate/", "hiscore/", "battles/",
+             "vote/", "killcams/", "itemlist/", "droptable/", "staff/", "support/",
+             "rules/", "provablyfair/"]
     sitemap = '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
     for p in pages:
         sitemap += f"  <url><loc>{DOMAIN}/{p}</loc></url>\n"
@@ -1338,6 +1603,8 @@ if __name__ == "__main__":
     build_register()
     build_donate()
     build_hiscore()
+    build_battles()
+    build_killcams()
     build_vote()
     build_itemlist()
     build_droptable()

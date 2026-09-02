@@ -23,6 +23,21 @@
       });
   };
 
+  // POSTs a JSON body and reads a JSON reply. Split from rspklApi rather than
+  // folded into it because every caller of the read helper wants a cache-able
+  // GET, and a helper that could do either would hide which it did.
+  window.rspklApiPost = function (path, body) {
+    if (!CFG.apiBase) { return Promise.reject(new Error('api disabled')); }
+    return fetch(CFG.apiBase + path, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+      body: JSON.stringify(body || {})
+    }).then(function (r) {
+      if (!r.ok) { throw new Error('HTTP ' + r.status); }
+      return r.json();
+    });
+  };
+
   // ---- helpers ----
   function $(s, c) { return (c || document).querySelector(s); }
   function $$(s, c) { return Array.prototype.slice.call((c || document).querySelectorAll(s)); }

@@ -3,10 +3,10 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Create Your Account — Play Instantly | RuneScape PK League</title>
-  <meta name="description" content="Create your RSPKL account — no website sign-up required. Your account is created the first time you log in.">
-  <meta property="og:title" content="Create Your Account — Play Instantly | RuneScape PK League">
-  <meta property="og:description" content="Create your RSPKL account — no website sign-up required. Your account is created the first time you log in.">
+  <title>Battle Finder — RSPKL Scheduled PvP | RuneScape PK League</title>
+  <meta name="description" content="RSPKL Battle Finder - rated 1v1 battles on Pure NH, Zerk NH and Main NH builds, the scheduled fight board, and 5-minute fight alerts by email or text.">
+  <meta property="og:title" content="Battle Finder — RSPKL Scheduled PvP | RuneScape PK League">
+  <meta property="og:description" content="RSPKL Battle Finder - rated 1v1 battles on Pure NH, Zerk NH and Main NH builds, the scheduled fight board, and 5-minute fight alerts by email or text.">
   <meta property="og:type" content="website">
   <meta property="og:image" content="https://rspkl.com/assets/img/app-icon.png">
   <meta name="theme-color" content="#c98f14">
@@ -63,55 +63,86 @@
   
     <div class="page-hero">
       <img class="wm" src="/assets/img/skull-gold.png" alt="">
-      <div class="kicker">Create your account</div>
-      <h1>Ready in <em>Seconds</em></h1>
-      <p class="sub">No website sign-up required. Your account is created the first time you log in.</p>
+      <div class="kicker">Scheduled PvP</div>
+      <h1>The <em>Battle Finder</em></h1>
+      <p class="sub">Rated 1v1s on one ladder and three builds - Pure NH, Zerk NH, Main NH, identical gear. Watch what is booked, then get told before it starts.</p>
     </div>
     <section class="section">
       <div class="container">
-        <div class="section-head">
-      <div class="kicker">Choose how you want to play</div>
-      <h2>Pick a Client</h2><p class="sub">Open a client, choose a username and password, and your account is created automatically.</p>
-      <div class="diamond"><i></i></div>
-    </div>
-        <div class="grid-2">
-          <div class="panel choice-card rv">
-            <span class="glyph"><i class="bi bi-window-desktop"></i></span>
-            <h3>Web Client</h3>
-            <p>Play instantly in your desktop browser. Your account is created when you
-            log in for the first time.</p>
-            <a class="btn btn-gold" href="/play/">OPEN WEB CLIENT</a>
+        <div class="with-side">
+          <div class="panel rv">
+            <div class="panel-head">
+              <h3 id="bf-board-title">HIGH VALUE BATTLES</h3>
+              <div class="seg">
+                <button class="on" data-sort="hype">Biggest</button>
+                <button data-sort="time">Soonest</button>
+              </div>
+            </div>
+            <div class="panel-body tight">
+              <div class="table-wrap">
+                <table class="league-table">
+                  <thead><tr><th>Starts</th><th>Fight</th><th>Build</th><th>Rating</th><th>Status</th></tr></thead>
+                  <tbody id="bf-body"></tbody>
+                </table>
+              </div>
+            </div>
           </div>
-          <div class="panel choice-card rv">
-            <span class="glyph"><i class="bi bi-phone"></i></span>
-            <h3>Mobile Client</h3>
-            <p>Play instantly on your phone. Your account is created when you log in for
-            the first time.</p>
-            <a class="btn btn-outline" href="/play/#mobile">OPEN MOBILE CLIENT</a>
+          <div class="side-col">
+            <div class="panel rv">
+              <div class="panel-head"><h3>Fight alerts</h3></div>
+              <div class="panel-body">
+                <p class="sub">Get a text or an email <b>5 minutes</b> and <b>1 minute</b>
+                before your next battle - even when you are logged out.</p>
+                <form id="bf-alerts">
+                  <div class="field">
+                    <label for="bf-user">In-game name</label>
+                    <input class="input" id="bf-user" placeholder="Your account name" maxlength="24">
+                  </div>
+                  <div class="field">
+                    <label for="bf-channel">Send it by</label>
+                    <div class="seg" id="bf-channel">
+                      <button type="button" class="on" data-channel="email">Email</button>
+                      <button type="button" data-channel="sms">Text</button>
+                    </div>
+                  </div>
+                  <div class="field">
+                    <label for="bf-address" id="bf-address-label">Email address</label>
+                    <input class="input" id="bf-address" placeholder="you@example.com">
+                  </div>
+                  <button class="btn btn-gold btn-block" type="submit">SEND ME A CODE</button>
+                </form>
+                <form id="bf-verify" style="display:none">
+                  <div class="field">
+                    <label for="bf-code">Six-digit code</label>
+                    <input class="input" id="bf-code" placeholder="000000" maxlength="6" inputmode="numeric">
+                  </div>
+                  <button class="btn btn-gold btn-block" type="submit">CONFIRM</button>
+                  <button class="btn btn-block" type="button" id="bf-restart">Start again</button>
+                </form>
+                <p class="sub" id="bf-alert-note"></p>
+              </div>
+            </div>
+            <div class="panel rv">
+              <div class="panel-head"><h3>How it works</h3></div>
+              <div class="panel-body hs-cats">
+                <div class="cat-group">
+                  <p class="cat-title">In game</p>
+                  <p class="sub"><b>::battles</b> opens the finder. Pick a build, queue, and
+                  you are paired with the closest rating waiting.</p>
+                </div>
+                <div class="cat-group">
+                  <p class="cat-title">Book ahead</p>
+                  <p class="sub">Post a battle with an open seat at a time you choose. It
+                  lands on this board for anyone to take.</p>
+                </div>
+                <div class="cat-group">
+                  <p class="cat-title">Rating</p>
+                  <p class="sub">Bronze through Dragon on the same ladder the Wilderness
+                  uses. Beating someone above you is worth more.</p>
+                </div>
+              </div>
+            </div>
           </div>
-        </div>
-      </div>
-    </section>
-    <section class="section">
-      <div class="container">
-        <div class="section-head">
-      <div class="kicker">How it works</div>
-      <h2>Three Steps to the Wilderness</h2>
-      <div class="diamond"><i></i></div>
-    </div>
-        <div class="steps">
-          <div class="step rv"><h3>Open the Client</h3>
-            <p>Use the recommended client above to reach the login screen.</p></div>
-          <div class="step rv"><h3>Choose your Login</h3>
-            <p>Enter any username and password you would like to use.</p></div>
-          <div class="step rv"><h3>Start Playing</h3>
-            <p>If the username is available, your new account is created instantly.</p></div>
-        </div>
-        <div class="note-strip">
-          <i class="bi bi-exclamation-triangle"></i>
-          <span>Username already taken? If you see “Invalid username or password,” simply
-          try another username. Prefer the downloadable desktop client?
-          <a href="/download/">View downloads</a>.</span>
         </div>
       </div>
     </section>
@@ -177,6 +208,6 @@
     <button class="cart-fab" id="cart-fab"><i class="bi bi-trophy"></i> CART <span class="n" id="cart-count">0</span></button>
     <div class="toast" id="toast" role="status"></div>
     <script src="/assets/js/main.js"></script>
-  
+  <script src="/assets/js/battles.js"></script>
 </body>
 </html>

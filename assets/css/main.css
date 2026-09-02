@@ -764,3 +764,197 @@ tr.r1{background:rgba(201,143,20,.08)}
 .stat{background:var(--panel);border:1px solid var(--line);border-radius:5px;padding:20px;text-align:center}
 .stat .v{font-family:var(--font-display);font-weight:700;font-size:26px;color:var(--gold)}
 .stat .k{font-family:var(--font-mono);font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--muted);margin-top:4px}
+
+/* ============================================================
+   ranked ladder — Bronze → Dragon crests + Elo explainer
+   Tier metal is carried by --m1 / --m2 / --ink on .crest, so
+   one shield recipe serves every division.
+   ============================================================ */
+.ladder-rail{
+  display:grid;grid-template-columns:repeat(5,1fr);gap:12px;position:relative;
+}
+.ladder-rail::before{
+  content:"";position:absolute;left:10%;right:10%;top:52px;height:2px;
+  background:linear-gradient(90deg,var(--bronze-2),var(--steel-1),var(--mith-1),var(--rune-1),var(--drag-1));
+  opacity:.4;
+}
+:root{
+  --bronze-1:#cd7f32;--bronze-2:#8c4a1c;
+  --steel-1:#cfd8e3;--steel-2:#79838f;
+  --mith-1:#7d9bf2;--mith-2:#2f4499;
+  --rune-1:#4fd0d6;--rune-2:#14707c;
+  --drag-1:#ef6a4f;--drag-2:#8f1d17;
+}
+.tier{position:relative;text-align:center;padding:0 2px}
+.crest{
+  --m1:var(--bronze-1);--m2:var(--bronze-2);--ink:#2a1608;
+  position:relative;display:block;width:96px;height:106px;margin:0 auto 14px;
+  background:
+    linear-gradient(160deg,rgba(255,255,255,.85) 0%,var(--m1) 34%,var(--m2) 100%);
+  clip-path:polygon(50% 0,100% 15%,100% 58%,50% 100%,0 58%,0 15%);
+  filter:drop-shadow(0 10px 20px rgba(0,0,0,.6));
+  transition:transform .25s ease,filter .25s ease;
+}
+.crest::after{
+  content:"";position:absolute;inset:5px;clip-path:inherit;
+  box-shadow:inset 0 0 0 2px rgba(0,0,0,.32),inset 0 2px 0 rgba(255,255,255,.38);
+}
+.crest i{
+  position:absolute;inset:0;background:var(--ink);opacity:.8;
+  -webkit-mask:url(/assets/img/skull-gold.png) center 39%/50% no-repeat;
+          mask:url(/assets/img/skull-gold.png) center 39%/50% no-repeat;
+}
+.tier:hover .crest{transform:translateY(-5px) scale(1.04);filter:drop-shadow(0 14px 26px rgba(0,0,0,.7))}
+.t-bronze .crest{--m1:var(--bronze-1);--m2:var(--bronze-2);--ink:#2a1608}
+.t-steel  .crest{--m1:var(--steel-1); --m2:var(--steel-2); --ink:#20262d}
+.t-mith   .crest{--m1:var(--mith-1);  --m2:var(--mith-2);  --ink:#121b45}
+.t-rune   .crest{--m1:var(--rune-1);  --m2:var(--rune-2);  --ink:#07333a}
+.t-drag   .crest{--m1:var(--drag-1);  --m2:var(--drag-2);  --ink:#3d0a06}
+.t-drag .crest{filter:drop-shadow(0 10px 20px rgba(0,0,0,.6)) drop-shadow(0 0 14px rgba(239,106,79,.55))}
+.t-drag:hover .crest{filter:drop-shadow(0 14px 26px rgba(0,0,0,.7)) drop-shadow(0 0 20px rgba(239,106,79,.7))}
+.tier-name{
+  display:block;font-family:var(--font-display);font-weight:700;font-size:14px;
+  letter-spacing:.16em;text-transform:uppercase;color:var(--bone);
+}
+.tier-elo{
+  display:block;font-family:var(--font-mono);font-size:11.5px;font-weight:600;
+  letter-spacing:.1em;color:var(--gold);margin-top:3px;
+}
+.tier-pop{
+  display:block;font-family:var(--font-mono);font-size:9.5px;letter-spacing:.2em;
+  text-transform:uppercase;color:var(--muted);margin-top:5px;
+}
+@media(max-width:860px){
+  .ladder-rail{grid-template-columns:repeat(3,1fr);row-gap:28px}
+  .ladder-rail::before{display:none}
+  .crest{width:80px;height:88px}
+}
+@media(max-width:460px){.ladder-rail{grid-template-columns:repeat(2,1fr)}}
+
+.elo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:40px}
+@media(max-width:860px){.elo-grid{grid-template-columns:1fr}}
+.elo-card{
+  position:relative;background:var(--panel);border:1px solid var(--line);
+  border-radius:5px;padding:24px 22px 22px;
+}
+.elo-card:hover{border-color:var(--gold-3)}
+.elo-n{
+  font-family:var(--font-mono);font-size:10px;font-weight:600;letter-spacing:.28em;
+  color:var(--gold-2);display:block;margin-bottom:10px;
+}
+.elo-card h3{font-size:15px;letter-spacing:.12em;text-transform:uppercase;margin-bottom:8px}
+.elo-card p{color:var(--muted);font-size:13.5px;margin:0}
+.elo-formula{
+  display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:8px 18px;
+  margin-top:20px;padding:15px 18px;border:1px solid var(--line-gold);border-radius:5px;
+  background:rgba(201,143,20,.07);
+  font-family:var(--font-mono);font-size:11.5px;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--parch);text-align:center;
+}
+.elo-formula b{color:var(--gold);font-weight:600}
+
+/* ---------- top killcams ---------- */
+/* The board is a list of fights, not a grid of cards: a rank, the two names,
+   and the vote. Ranked order is the page's whole point, so rows share a baseline
+   and the rank sits in a fixed gutter that the eye can run down. */
+.kc-list{display:flex;flex-direction:column;gap:8px}
+.kc-card{
+  display:grid;grid-template-columns:56px 1fr auto;align-items:center;gap:16px;
+  background:var(--panel);border:1px solid var(--line);border-radius:5px;
+  padding:14px 16px;
+}
+.kc-card:hover{border-color:var(--gold-3)}
+.kc-rank{
+  font-family:var(--font-mono);font-size:15px;font-weight:600;color:var(--gold-2);
+  letter-spacing:.04em;text-align:center;font-variant-numeric:tabular-nums;
+}
+.kc-names{font-size:15px;color:var(--parch);letter-spacing:.01em}
+.kc-names b{color:var(--bone);font-weight:700}
+.kc-names i{color:var(--gold-3);font-size:11px;margin:0 4px}
+.kc-meta{
+  display:flex;flex-wrap:wrap;gap:4px 14px;margin-top:5px;
+  font-family:var(--font-mono);font-size:10.5px;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--muted);
+}
+.kc-actions{display:flex;align-items:center;gap:10px}
+.kc-vote{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  min-width:52px;padding:6px 8px;background:#171611;color:var(--ash);
+  border:1px solid var(--line-2);border-radius:4px;cursor:pointer;
+  font-family:var(--font-mono);font-size:13px;line-height:1.15;transition:.15s;
+}
+.kc-vote i{font-size:11px}
+.kc-vote b{font-weight:600;font-variant-numeric:tabular-nums}
+.kc-vote:hover{border-color:var(--gold-2);color:var(--gold)}
+.kc-vote.on{background:rgba(201,143,20,.14);border-color:var(--gold-2);color:var(--gold-hi)}
+.kc-vote:disabled{opacity:.55;cursor:default}
+.kc-empty{color:var(--muted);padding:26px 4px;margin:0;text-align:center}
+@media(max-width:640px){
+  .kc-card{grid-template-columns:40px 1fr;row-gap:12px}
+  .kc-actions{grid-column:2;justify-content:flex-end}
+}
+
+/* The replay viewer. Dark to the edges on purpose: the fight is drawn on an
+   empty floor because a cam records tiles and no scenery, and dressing the
+   frame would imply a place the recording does not hold. */
+.kc-modal{
+  position:fixed;inset:0;z-index:120;display:none;
+  background:rgba(8,8,6,.86);backdrop-filter:blur(3px);
+  padding:24px;overflow-y:auto;
+}
+.kc-modal.open{display:flex;align-items:flex-start;justify-content:center}
+.kc-frame{
+  width:100%;max-width:620px;background:var(--panel);border:1px solid var(--line-gold);
+  border-radius:6px;box-shadow:var(--shadow-1);overflow:hidden;
+}
+.kc-frame-head{
+  display:flex;align-items:center;justify-content:space-between;gap:14px;
+  padding:14px 16px;border-bottom:1px solid var(--line);background:var(--panel-2);
+}
+.kc-frame-head h3{font-size:15px;letter-spacing:.02em;margin:0;color:var(--parch);font-weight:500}
+.kc-frame-head h3 b{color:var(--bone)}
+.kc-head-tools{display:flex;align-items:center;gap:8px}
+#kc-close{
+  background:none;border:1px solid var(--line-2);color:var(--ash);
+  width:30px;height:30px;border-radius:4px;cursor:pointer;
+}
+#kc-close:hover{color:var(--gold);border-color:var(--gold-3)}
+.kc-stage{background:#0a0a08;padding:0;line-height:0}
+#kc-canvas{width:100%;height:auto;display:block}
+.kc-controls{display:flex;align-items:center;gap:12px;padding:12px 16px;border-top:1px solid var(--line)}
+#kc-play{
+  width:36px;height:36px;flex:none;border-radius:4px;cursor:pointer;
+  background:linear-gradient(180deg,var(--gold-hi),var(--gold) 35%,var(--gold-2));
+  border:1px solid var(--gold-3);color:#1a1505;font-size:16px;
+}
+#kc-scrub{flex:1;accent-color:var(--gold-2);height:4px}
+#kc-status{
+  font-family:var(--font-mono);font-size:10.5px;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--muted);white-space:nowrap;
+}
+.kc-frame-stats{
+  display:flex;flex-wrap:wrap;gap:6px 16px;padding:12px 16px 16px;
+  border-top:1px solid var(--line);
+  font-family:var(--font-mono);font-size:10.5px;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--ash);
+}
+.kc-legend{
+  display:flex;gap:18px;flex-wrap:wrap;padding:0 16px 14px;
+  font-family:var(--font-mono);font-size:10px;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--muted);
+}
+.kc-legend span{display:flex;align-items:center;gap:7px}
+.kc-legend i{width:9px;height:9px;border-radius:50%;display:inline-block}
+.kc-dot-k{background:var(--gold)}
+.kc-dot-v{background:#e8776f}
+
+/* ---------------------------------------------------------------- battles
+   The Battle Finder board and its alert form. Four small classes, because
+   the page is otherwise built entirely from the panel/table/seg/field
+   material the hiscores and donate pages already use - a scheduled-fight
+   board is a league table with a countdown in the first column, and it
+   should read as one. */
+.league-table td.empty{color:var(--muted);text-align:center;padding:26px 4px}
+.league-table .dim{color:var(--muted)}
+.league-table .live{color:var(--red, #d9534f)}
+.sub.bad{color:var(--red, #d9534f)}

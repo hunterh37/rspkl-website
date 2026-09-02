@@ -3,10 +3,10 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Create Your Account — Play Instantly | RuneScape PK League</title>
-  <meta name="description" content="Create your RSPKL account — no website sign-up required. Your account is created the first time you log in.">
-  <meta property="og:title" content="Create Your Account — Play Instantly | RuneScape PK League">
-  <meta property="og:description" content="Create your RSPKL account — no website sign-up required. Your account is created the first time you log in.">
+  <title>Top Killcams — RSPKL Replays | RuneScape PK League</title>
+  <meta name="description" content="Watch the top RSPKL killcams — the last five seconds of every wilderness kill, replayed tick by tick, and voted on by the league.">
+  <meta property="og:title" content="Top Killcams — RSPKL Replays | RuneScape PK League">
+  <meta property="og:description" content="Watch the top RSPKL killcams — the last five seconds of every wilderness kill, replayed tick by tick, and voted on by the league.">
   <meta property="og:type" content="website">
   <meta property="og:image" content="https://rspkl.com/assets/img/app-icon.png">
   <meta name="theme-color" content="#c98f14">
@@ -63,58 +63,85 @@
   
     <div class="page-hero">
       <img class="wm" src="/assets/img/skull-gold.png" alt="">
-      <div class="kicker">Create your account</div>
-      <h1>Ready in <em>Seconds</em></h1>
-      <p class="sub">No website sign-up required. Your account is created the first time you log in.</p>
+      <div class="kicker">Replays</div>
+      <h1>Top <em>Killcams</em></h1>
+      <p class="sub">Every kill in the wilderness is recorded. Watch the last five seconds back, and vote for the ones worth remembering.</p>
     </div>
     <section class="section">
       <div class="container">
-        <div class="section-head">
-      <div class="kicker">Choose how you want to play</div>
-      <h2>Pick a Client</h2><p class="sub">Open a client, choose a username and password, and your account is created automatically.</p>
-      <div class="diamond"><i></i></div>
-    </div>
-        <div class="grid-2">
-          <div class="panel choice-card rv">
-            <span class="glyph"><i class="bi bi-window-desktop"></i></span>
-            <h3>Web Client</h3>
-            <p>Play instantly in your desktop browser. Your account is created when you
-            log in for the first time.</p>
-            <a class="btn btn-gold" href="/play/">OPEN WEB CLIENT</a>
+        <div class="with-side">
+          <div class="panel rv">
+            <div class="panel-head">
+              <h3>THE BOARD</h3>
+              <div class="seg" id="kc-sort">
+                <button class="on" data-sort="top">Most Voted</button>
+                <button data-sort="new">Newest</button>
+              </div>
+            </div>
+            <div class="panel-body tight">
+              <div class="kc-list" id="kc-list"></div>
+              <div class="pager" id="kc-pager"></div>
+            </div>
           </div>
-          <div class="panel choice-card rv">
-            <span class="glyph"><i class="bi bi-phone"></i></span>
-            <h3>Mobile Client</h3>
-            <p>Play instantly on your phone. Your account is created when you log in for
-            the first time.</p>
-            <a class="btn btn-outline" href="/play/#mobile">OPEN MOBILE CLIENT</a>
+          <div class="side-col">
+            <div class="panel rv">
+              <div class="panel-head"><h3>Find a fight</h3></div>
+              <div class="panel-body">
+                <form id="kc-search">
+                  <div class="field">
+                    <label for="kc-player-filter">Killer or victim</label>
+                    <input class="input" id="kc-player-filter" placeholder="Search players">
+                  </div>
+                  <button class="btn btn-gold btn-block" type="submit">SEARCH CAMS</button>
+                </form>
+              </div>
+            </div>
+            <div class="panel rv">
+              <div class="panel-head"><h3>How cams work</h3></div>
+              <div class="panel-body">
+                <div class="kc-meta" style="text-transform:none;letter-spacing:.02em;font-family:var(--font-body);font-size:13.5px;display:block;color:var(--muted)">
+                  <p style="margin:0 0 10px">The world records the five seconds before every
+                  wilderness kill &mdash; both fighters, every tick, every hit &mdash; and keeps
+                  your last twenty. Type <b style="color:var(--parch)">::killcams</b> in game to
+                  watch yours back.</p>
+                  <p style="margin:0">Cams land here automatically. One vote per viewer, and the
+                  board leads with whatever the league votes up.</p>
+                </div>
+              </div>
+            </div>
           </div>
+        </div>
+        <div class="note-strip" id="kc-note">
+          <i class="bi bi-camera-reels"></i>
+          <span>Sample board &mdash; live cams start syncing from the world when Season 1 opens.</span>
         </div>
       </div>
     </section>
-    <section class="section">
-      <div class="container">
-        <div class="section-head">
-      <div class="kicker">How it works</div>
-      <h2>Three Steps to the Wilderness</h2>
-      <div class="diamond"><i></i></div>
-    </div>
-        <div class="steps">
-          <div class="step rv"><h3>Open the Client</h3>
-            <p>Use the recommended client above to reach the login screen.</p></div>
-          <div class="step rv"><h3>Choose your Login</h3>
-            <p>Enter any username and password you would like to use.</p></div>
-          <div class="step rv"><h3>Start Playing</h3>
-            <p>If the username is available, your new account is created instantly.</p></div>
+
+    <div class="kc-modal" id="kc-modal" role="dialog" aria-modal="true" aria-label="Killcam replay">
+      <div class="kc-frame">
+        <div class="kc-frame-head">
+          <h3 id="kc-modal-title">Killcam</h3>
+          <div class="kc-head-tools">
+            <button class="kc-vote" id="kc-modal-vote" data-vote=""></button>
+            <button id="kc-close" aria-label="Close replay"><i class="bi bi-x-lg"></i></button>
+          </div>
         </div>
-        <div class="note-strip">
-          <i class="bi bi-exclamation-triangle"></i>
-          <span>Username already taken? If you see “Invalid username or password,” simply
-          try another username. Prefer the downloadable desktop client?
-          <a href="/download/">View downloads</a>.</span>
+        <div class="kc-stage"><canvas id="kc-canvas" width="620" height="620"></canvas></div>
+        <div class="kc-controls">
+          <button id="kc-play" aria-label="Play or pause"><i class="bi bi-pause-fill"></i></button>
+          <input type="range" id="kc-scrub" min="0" max="800" value="0" step="1"
+                 aria-label="Scrub through the replay">
+          <span id="kc-status">&mdash;</span>
         </div>
+        <div class="kc-legend">
+          <span><i class="kc-dot-k"></i> Killer</span>
+          <span><i class="kc-dot-v"></i> Victim</span>
+          <span>Ring = attack &middot; wedge = facing &middot; 1 tile = 1 square</span>
+        </div>
+        <div class="kc-frame-stats" id="kc-modal-stats"></div>
       </div>
-    </section>
+    </div>
   </main>
   
     <section class="section-tight">
@@ -177,6 +204,6 @@
     <button class="cart-fab" id="cart-fab"><i class="bi bi-trophy"></i> CART <span class="n" id="cart-count">0</span></button>
     <div class="toast" id="toast" role="status"></div>
     <script src="/assets/js/main.js"></script>
-  
+  <script src="/assets/js/killcams.js"></script>
 </body>
 </html>

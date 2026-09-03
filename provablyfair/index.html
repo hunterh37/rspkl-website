@@ -52,25 +52,25 @@
       <img class="wm" src="/assets/img/skull-gold.png" alt="">
       <div class="kicker">Verification</div>
       <h1>Provably <em>Fair</em></h1>
-      <p class="sub">Every box roll, duel stake and tournament draw is seeded, hashed and verifiable by the player.</p>
+      <p class="sub">Every box roll, stake and tournament draw is seeded, hashed and player-verifiable.</p>
     </div>
     <section class="section">
       <div class="container">
         <div class="section-head">
-      <div class="kicker">How it works</div>
+      <div class="kicker">Method</div>
       <h2>The Seed Chain</h2>
       <div class="diamond"><i></i></div>
     </div>
         <div class="pf-steps">
           <div class="step rv"><h3>Server seed</h3>
-            <p>Before each season the server generates a random seed and publishes its
-            SHA-256 hash. The seed stays sealed until the reveal.</p></div>
+            <p>The server generates a seed each season and publishes its SHA-256 hash.
+            The seed stays sealed until reveal.</p></div>
           <div class="step rv"><h3>Your client seed</h3>
-            <p>Your client adds its own seed — visible to you, changeable any time in
-            settings. Neither side alone can move the roll.</p></div>
+            <p>The client adds its own seed, visible and changeable in settings.
+            Neither side alone determines the roll.</p></div>
           <div class="step rv"><h3>The roll</h3>
-            <p>Roll = HMAC(server seed, client seed + nonce). The result decides your box,
-            your stake, your bracket. Then we publish the server seed to verify it all.</p></div>
+            <p>Roll = HMAC(server seed, client seed + nonce), deciding box, stake and
+            bracket. The server seed is published afterward for verification.</p></div>
         </div>
         <div class="panel rv" style="max-width:860px;margin:34px auto 0">
           <div class="panel-head"><h3>Verify a roll yourself</h3><div class="r">Season 1 demo</div></div>
@@ -81,14 +81,13 @@
               <input class="input" value="golden-skull" readonly></div>
             <div class="field"><label>Example roll — Gold Mystery Box</label>
               <div class="hash-out">HMAC-SHA256 → 0.7412 → item tier 3 — Dragon claws</div></div>
-            <p class="small muted">When the season server goes live this panel runs the
-            real verification against the published seeds.</p>
+            <p class="small muted">At season launch this panel verifies against the published seeds.</p>
           </div>
         </div>
         <div class="note-strip" style="max-width:860px;margin:26px auto 0">
           <i class="bi bi-patch-check"></i>
-          <span>Hashes are committed before anyone plays and revealed after each season
-          week. If the hash does not verify, that week’s rolls are voided and comped.</span>
+          <span>Hashes are committed before play and revealed weekly. A hash that fails
+          verification voids and compensates that week&rsquo;s rolls.</span>
         </div>
       </div>
     </section>

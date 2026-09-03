@@ -342,9 +342,14 @@ Stage.prototype.pose = function (fighter) {
   // position rather than toward it.
   fighter.object.position.set(at.x * TILE, 0, -at.y * TILE);
 
+  // A frame stores the tile a fighter is turned towards, in the cam's own
+  // deltas - so the direction they face is that tile minus the one they are
+  // standing on. Reading the delta as a direction points every fighter out of
+  // the cam's base tile instead, which stood two men in a fight shoulder to
+  // shoulder facing the same way.
   var face = at.frame;
-  if (!(face.faceDx === -1 && face.faceDy === -1) && (face.faceDx || face.faceDy)) {
-    fighter.object.rotation.y = Math.atan2(face.faceDx, -face.faceDy);
+  if (face.facing && (face.faceDx !== face.dx || face.faceDy !== face.dy)) {
+    fighter.object.rotation.y = Math.atan2(face.faceDx - face.dx, -(face.faceDy - face.dy));
   }
 
   var pose = anim.poseFor(fighter, this.t);

@@ -260,14 +260,11 @@ TIERS = [
 
 ELO_CARDS = [
     ("01", "Ten placement fights",
-     "Ten placement fights seed your rating. A clean run places you above "
-     "Bronze outright."),
+     "Ten placement fights seed the rating. A 10-0 run places above Bronze."),
     ("02", "Every fight is rated",
-     "Rated duels and Wilderness kills both move Elo. Beating a higher rating "
-     "pays more than beating a lower one."),
+     "Rated duels and Wilderness kills both move Elo. Higher-rated wins pay more."),
     ("03", "Promotion &amp; grace",
-     "Crossing a tier ceiling promotes on the spot. Dropping below it leaves "
-     "three fights to recover before the crest changes."),
+     "Crossing a tier ceiling promotes immediately. Demotion allows three recovery fights."),
 ]
 
 
@@ -292,8 +289,7 @@ def ladder_section() -> str:
     return f"""
     <section class="section" id="ranked">
       <div class="container">
-        {section_head("Ranked ladder", "Bronze to Dragon",
-                      "Five divisions on one rating. Your crest is the Elo you hold.")}
+        {section_head("Ranked ladder", "Bronze to Dragon")}
         <div class="ladder-rail rv">{tiers}</div>
         <div class="elo-grid">{cards}</div>
         <div class="elo-formula rv">
@@ -343,9 +339,8 @@ def build_home():
           </div>
         </div>
         <div class="hero-kicker"><span class="live-mark"></span> Old School combat · Skill-based Elo</div>
-        <h1 class="hero-title">Rule <span class="line-gold">the ladder.</span></h1>
-        <p class="hero-sub">Ten placement fights set your rating. Every fight after that
-        moves it, across five divisions from Bronze to Dragon.</p>
+        <h1 class="hero-title">Ranked <span class="line-gold">PvP ladder.</span></h1>
+        <p class="hero-sub">Ten placement fights set your rating. Five divisions, Bronze to Dragon.</p>
         <div class="hero-actions">
           <a class="btn btn-gold btn-lg" href="/play/"><i class="bi bi-crosshair"></i> ENTER THE LEAGUE</a>
           <a class="hero-text-link" href="/hiscore/">VIEW THE LADDER <i class="bi bi-arrow-right"></i></a>
@@ -359,7 +354,7 @@ def build_home():
 
     <section class="section ranked-system" id="ranked">
       <div class="container">
-        {section_head("The competitive system", "How the rating works", "One Elo rating, five divisions, and a published formula.")}
+        {section_head("Rating system", "How Elo is calculated")}
         <div class="elo-grid">{cards}</div>
         <div class="elo-formula rv">
           <span>NEW ELO = ELO + <b>K</b> &times; (RESULT &minus; EXPECTED)</span>
@@ -381,7 +376,7 @@ def build_home():
 def build_play():
     content = f"""
     {page_hero("Web client", "Play RSPKL <em>Instantly</em>",
-               "Runs in the browser. No download, no registration — accounts are created on first login.")}
+               "Browser client. No download. Accounts are created on first login.")}
     <section class="section">
       <div class="container">
         <div class="client-frame rv">
@@ -418,27 +413,24 @@ def build_play():
         </div>
         <div class="note-strip">
           <i class="bi bi-info-circle"></i>
-          <span>The web client deploys with Season 1. Logins entered here are saved to this
-          device.</span>
+          <span>Web client deploys with Season 1. Logins are stored on this device.</span>
         </div>
       </div>
     </section>
     <section class="section" id="mobile">
       <div class="container">
-        {section_head("Any device", "Desktop or Mobile", "One account, one ladder, both platforms.")}
+        {section_head("Platforms", "Desktop and Mobile")}
         <div class="grid-2">
           <div class="panel choice-card rv">
             <span class="glyph"><i class="bi bi-display"></i></span>
             <h3>Desktop Browser</h3>
-            <p>Full interface suite at full screen. Launches from this page; no install,
-            updates automatically.</p>
+            <p>Full-screen interface. Launches from this page. No install.</p>
             <a class="btn btn-gold" href="#top">OPEN WEB CLIENT</a>
           </div>
           <div class="panel choice-card rv">
             <span class="glyph"><i class="bi bi-phone"></i></span>
             <h3>Mobile Browser</h3>
-            <p>Touch controls tuned for phones. Same account, ladder and Wilderness as
-            desktop.</p>
+            <p>Touch controls. Same account, ladder and Wilderness as desktop.</p>
             <a class="btn btn-outline js-soon" data-soon="The mobile client" href="#">OPEN MOBILE CLIENT</a>
           </div>
         </div>
@@ -468,22 +460,21 @@ def build_download():
 
     content = f"""
     {page_hero("Client downloads", "Native <em>Clients</em>",
-               "Builds for Windows, macOS, Linux and Java. All of them update automatically.")}
+               "Windows, macOS, Linux and Java builds. All update automatically.")}
     <section class="section">
       <div class="container">
-        {section_head("No download required", "Instant Play", "Both browser clients run without an install.")}
+        {section_head("Browser", "Instant Play")}
         <div class="grid-2">
           <div class="panel choice-card rv">
             <span class="glyph"><i class="bi bi-window-desktop"></i></span>
             <h3>Web Client</h3>
-            <p>Runs in the desktop browser. No download, no registration, always current.</p>
+            <p>Desktop browser. No download or registration.</p>
             <a class="btn btn-gold" href="/play/">PLAY ON BROWSER</a>
           </div>
           <div class="panel choice-card rv">
             <span class="glyph"><i class="bi bi-phone"></i></span>
             <h3>Mobile Client</h3>
-            <p>Runs in the phone browser. Same account and ladder, touch-tuned
-            interfaces.</p>
+            <p>Phone browser. Same account and ladder.</p>
             <a class="btn btn-outline" href="/play/#mobile">PLAY ON MOBILE</a>
           </div>
         </div>
@@ -491,13 +482,11 @@ def build_download():
     </section>
     <section class="section">
       <div class="container">
-        {section_head("Native clients", "Download the Client",
-               "Select your operating system below. All clients update automatically.")}
+        {section_head("Native clients", "Download the Client")}
         <div class="os-grid">{os_cards}</div>
         <div class="note-strip">
           <i class="bi bi-tools"></i>
-          <span>A debug tool, an uninstaller and a no-admin installer are available for load
-          failures. Downloads unlock with Season 1.</span>
+          <span>Debug tool, uninstaller and no-admin installer available. Downloads unlock with Season 1.</span>
         </div>
       </div>
     </section>"""
@@ -510,11 +499,10 @@ def build_download():
 def build_register():
     content = f"""
     {page_hero("Create your account", "Ready in <em>Seconds</em>",
-               "No website sign-up required. Your account is created the first time you log in.")}
+               "No website sign-up. The account is created on first login.")}
     <section class="section">
       <div class="container">
-        {section_head("Choose how you want to play", "Pick a Client",
-               "Open a client, choose a username and password, and your account is created automatically.")}
+        {section_head("Clients", "Pick a Client")}
         <div class="grid-2">
           <div class="panel choice-card rv">
             <span class="glyph"><i class="bi bi-window-desktop"></i></span>
@@ -533,19 +521,19 @@ def build_register():
     </section>
     <section class="section">
       <div class="container">
-        {section_head("How it works", "Three Steps to the Wilderness")}
+        {section_head("Procedure", "Three Steps")}
         <div class="steps">
           <div class="step rv"><h3>Open the Client</h3>
-            <p>Use the recommended client above to reach the login screen.</p></div>
+            <p>Open a client above to reach the login screen.</p></div>
           <div class="step rv"><h3>Choose your Login</h3>
-            <p>Enter any username and password you would like to use.</p></div>
+            <p>Enter a username and password.</p></div>
           <div class="step rv"><h3>Start Playing</h3>
-            <p>If the username is available, your new account is created instantly.</p></div>
+            <p>An available username creates the account instantly.</p></div>
         </div>
         <div class="note-strip">
           <i class="bi bi-exclamation-triangle"></i>
-          <span>“Invalid username or password” on a new account means the name is taken —
-          pick another. Native builds are on the <a href="/download/">downloads page</a>.</span>
+          <span>“Invalid username or password” on a new account means the name is taken.
+          Native builds: <a href="/download/">downloads</a>.</span>
         </div>
       </div>
     </section>"""
@@ -709,8 +697,8 @@ def build_donate():
     )
 
     content = f"""
-    {page_hero("Support the league", "RSPKL <em>Shop</em>",
-               "Credits, supporter ranks, mystery boxes and scrolls. Instant in-game delivery.")}
+    {page_hero("Shop", "RSPKL <em>Shop</em>",
+               "Credits, ranks, mystery boxes and scrolls. Instant in-game delivery.")}
     <section class="section">
       <div class="container">
         <div class="shop-strip rv">
@@ -720,18 +708,18 @@ def build_donate():
           <span><b>🏆</b> Most popular: $50 League Credits</span>
         </div>
 
-        {section_head("Top up", "League Credits", "Spend on ranks, boxes and the seasonal shop.")}
+        {section_head("Top up", "League Credits")}
         <div class="shop-grid">{credits}</div>
 
         {section_head("Supporter tiers", "Supporter Ranks",
-               "Six tiers of commands, cosmetics and boosted drop rates. No combat stats are sold.")}
+               "Six tiers. Commands, cosmetics and drop-rate boosts only; no combat stats.")}
         <div class="shop-grid">{ranks}</div>
 
-        {section_head("PK points", "League Points", "PKP delivered straight to your pouch.")}
+        {section_head("PK points", "League Points")}
         <div class="shop-grid">{points}</div>
 
         {section_head("Mystery boxes", "Mystery Boxes",
-               "Seeded rolls. The Provably Fair page documents how they are verified.")}
+               "Seeded rolls, verifiable on the Provably Fair page.")}
         <div class="shop-grid">{boxes_html}</div>
 
         {section_head("Consumables", "Scrolls &amp; Lamps")}
@@ -804,7 +792,7 @@ def build_hiscore():
 
     content = f"""
     {page_hero("Ladders", "RSPKL <em>Hiscores</em>",
-               "Ladders for combat, skills, LMS rating and monster killcounts, in Normal and Hardcore PvP.")}
+               "Combat, skills, LMS rating and monster killcounts. Normal and Hardcore PvP.")}
     <section class="section">
       <div class="container">
         <div class="with-side">
@@ -875,8 +863,7 @@ def build_battles():
     """
     content = f"""
     {page_hero("Scheduled PvP", "The <em>Battle Finder</em>",
-               "Rated 1v1s in three builds - Pure NH, Zerk NH and Main NH - on one ladder "
-               "with identical gear.")}
+               "Rated 1v1s in three builds: Pure NH, Zerk NH, Main NH. One ladder, fixed gear.")}
     <section class="section">
       <div class="container">
         <div class="with-side">
@@ -901,8 +888,7 @@ def build_battles():
             <div class="panel rv">
               <div class="panel-head"><h3>Fight alerts</h3></div>
               <div class="panel-body">
-                <p class="sub">Email or text <b>5 minutes</b> and <b>1 minute</b> before your
-                next battle, logged in or not.</p>
+                <p class="sub">Email or text <b>5 minutes</b> and <b>1 minute</b> before the next battle.</p>
                 <form id="bf-alerts">
                   <div class="field">
                     <label for="bf-user">In-game name</label>
@@ -937,18 +923,15 @@ def build_battles():
               <div class="panel-body hs-cats">
                 <div class="cat-group">
                   <p class="cat-title">In game</p>
-                  <p class="sub"><b>::battles</b> opens the finder. Queueing a build pairs you
-                  with the closest rating waiting.</p>
+                  <p class="sub"><b>::battles</b> opens the finder. Queueing pairs the closest waiting rating.</p>
                 </div>
                 <div class="cat-group">
                   <p class="cat-title">Book ahead</p>
-                  <p class="sub">A posted battle with an open seat is listed on this board
-                  until someone takes it.</p>
+                  <p class="sub">Posted battles with an open seat stay listed until taken.</p>
                 </div>
                 <div class="cat-group">
                   <p class="cat-title">Rating</p>
-                  <p class="sub">Bronze through Dragon on the Wilderness ladder. Wins against
-                  higher ratings pay more Elo.</p>
+                  <p class="sub">Bronze through Dragon. Higher-rated wins pay more Elo.</p>
                 </div>
               </div>
             </div>
@@ -980,8 +963,7 @@ def build_killcams():
     """
     content = f"""
     {page_hero("Replays", "Top <em>Killcams</em>",
-               "The last five seconds of every Wilderness kill, replayed tick by tick "
-               "and ranked by player vote.")}
+               "The final five seconds of every Wilderness kill, replayed tick by tick, ranked by vote.")}
     <section class="section">
       <div class="container">
         <div class="with-side">
@@ -1015,11 +997,10 @@ def build_killcams():
               <div class="panel-head"><h3>How cams work</h3></div>
               <div class="panel-body">
                 <div class="kc-meta" style="text-transform:none;letter-spacing:.02em;font-family:var(--font-body);font-size:13.5px;display:block;color:var(--muted)">
-                  <p style="margin:0 0 10px">The five seconds before every wilderness kill are
-                  recorded for both fighters &mdash; every tick and every hit. Your last twenty
-                  are kept; <b style="color:var(--parch)">::killcams</b> replays them in game.</p>
-                  <p style="margin:0">Cams post to this board automatically. One vote per viewer,
-                  and the board sorts by votes.</p>
+                  <p style="margin:0 0 10px">Five seconds before each Wilderness kill are recorded
+                  for both fighters, every tick and hit. The last twenty are kept;
+                  <b style="color:var(--parch)">::killcams</b> replays them in game.</p>
+                  <p style="margin:0">Cams post automatically. One vote per viewer; the board sorts by votes.</p>
                 </div>
               </div>
             </div>
@@ -1027,7 +1008,7 @@ def build_killcams():
         </div>
         <div class="note-strip" id="kc-note">
           <i class="bi bi-camera-reels"></i>
-          <span>Sample board &mdash; live cams start syncing from the world when Season 1 opens.</span>
+          <span>Sample board. Live cams sync from the world at Season 1.</span>
         </div>
       </div>
     </section>
@@ -1094,7 +1075,7 @@ def build_vote():
 
     content = f"""
     {page_hero("Toplists", "Vote for <em>RSPKL</em>",
-               "Five toplists, a 12-hour cooldown each, and vote credits plus PKP for every vote.")}
+               "Five toplists. 12-hour cooldown each. Vote credits and PKP per vote.")}
     <section class="section">
       <div class="container">
         <div class="with-side">
@@ -1132,8 +1113,7 @@ def build_vote():
             <div class="panel rv">
               <div class="panel-head"><h3>Why vote?</h3></div>
               <div class="panel-body">
-                <p class="small muted">Toplist rank is the main source of new players. Each site
-                takes under a minute and pays out every 12 hours.</p>
+                <p class="small muted">Toplist rank drives new-player traffic. Each site pays out every 12 hours.</p>
               </div>
             </div>
           </div>
@@ -1150,7 +1130,7 @@ def build_vote():
 def build_itemlist():
     content = f"""
     {page_hero("Item database", "RSPKL <em>Item List</em>",
-               "Search the league item database by name or ID to read an item's in-game stats.")}
+               "Search by name or ID for in-game item stats.")}
     <section class="section">
       <div class="container">
         <div class="panel rv" style="margin-bottom:22px">
@@ -1171,8 +1151,7 @@ def build_itemlist():
         </div>
         <div class="note-strip">
           <i class="bi bi-database"></i>
-          <span>Sample database slice — the full 24,000+ item index loads from the league
-          cache when Season 1 opens.</span>
+          <span>Sample slice. The full 24,000+ item index loads from the league cache at Season 1.</span>
         </div>
       </div>
     </section>"""
@@ -1193,11 +1172,11 @@ def build_droptable():
         ])
     )
     content = f"""
-    {page_hero("Drop transparency", "Monster <em>Drop Tables</em>",
-               "Published rates for every monster. Select a rank to see the exact rates it receives.")}
+    {page_hero("Drop rates", "Monster <em>Drop Tables</em>",
+               "Published rates for every monster, per supporter rank.")}
     <section class="section">
       <div class="container">
-        {section_head("Drop-rate calculator", "Choose Your Rank")}
+        {section_head("Calculator", "Select a Rank")}
         <div class="chip-row" style="justify-content:center;margin-bottom:30px">{chips}</div>
         <div class="with-side">
           <div class="panel rv">
@@ -1266,15 +1245,15 @@ def build_staff():
 
     content = f"""
     {page_hero("The team", "RSPKL <em>Staff List</em>",
-               "The league staff, grouped by in-game rank.")}
+               "League staff by in-game rank.")}
     <section class="section">
       <div class="container">
-        {section_head("Official staff team", "Our Team")}
+        {section_head("Roster", "Staff Team")}
         {groups}
         <div class="note-strip">
           <i class="bi bi-shield-check"></i>
-          <span>Staff will never ask for your password or ask you to trade items to
-          “verify” an account. Report anyone who does via <a href="/support/#report">support</a>.</span>
+          <span>Staff never request passwords or item trades. Report impersonation via
+          <a href="/support/#report">support</a>.</span>
         </div>
       </div>
     </section>"""
@@ -1287,16 +1266,16 @@ def build_staff():
 def build_support():
     cards = [
         ("bi-envelope", "Email Support",
-         "For account, payment or website help, send us an email at support@rspkl.com.",
+         "Account, payment and website issues: support@rspkl.com.",
          '<a class="btn btn-outline" href="mailto:support@rspkl.com">SEND AN EMAIL</a>'),
         ("bi-controller", "In-Game Support",
-         "Already in game? Use ::staff to contact an online staff member directly.",
+         "::staff contacts an online staff member directly.",
          '<span class="btn btn-outline mono" style="cursor:default">::STAFF IN-GAME</span>'),
         ("bi-chat-dots", "Live Chat Support",
-         "Chat with a support agent using the chat icon in the bottom-right corner.",
+         "Live agent via the chat icon, bottom-right.",
          '<button class="btn btn-outline js-soon" data-soon="Live chat">OPEN LIVE CHAT</button>'),
         ("bi-discord", "Discord Support",
-         "Open a support ticket in Discord for fast help from our team and community.",
+         "Discord tickets for team and community support.",
          '<button class="btn btn-outline js-soon" data-soon="Discord">OPEN DISCORD</button>'),
     ]
     cards_html = "".join(
@@ -1316,15 +1295,15 @@ def build_support():
     )
     content = f"""
     {page_hero("Contact", "RSPKL <em>Support</em>",
-               "Four channels for accounts, payments and player reports: email, in-game ::staff, live chat and Discord.")}
+               "Four channels: email, in-game ::staff, live chat, Discord.")}
     <section class="section">
       <div class="container">
-        {section_head("Support center", "How to Contact RSPKL")}
+        {section_head("Channels", "Contact RSPKL")}
         <div class="support-grid">{cards_html}</div>
         <div class="safety-note">
           <i class="bi bi-shield-exclamation"></i>
-          <span><b>Keep your account safe.</b> Never share your password or authentication
-          codes with anyone — including anyone claiming to be staff.</span>
+          <span><b>Account safety.</b> Passwords and authentication codes are never
+          requested by staff.</span>
         </div>
         <div class="section-head" id="recovery" style="margin-top:54px">
           <div class="kicker">Support</div><h2>Account Recovery &amp; FAQ</h2>
@@ -1358,7 +1337,7 @@ def build_rules():
     )
     content = f"""
     {page_hero("League law", "RSPKL <em>Rules</em>",
-               "Ten league rules, the punishment ladder that enforces them, and the legal policies.")}
+               "Ten rules, the punishment ladder, and legal policies.")}
     <section class="section">
       <div class="container">
         {section_head("Season 1", "The Rulebook")}
@@ -1411,20 +1390,20 @@ def build_rules():
 def build_provablyfair():
     content = f"""
     {page_hero("Verification", "Provably <em>Fair</em>",
-               "Every box roll, duel stake and tournament draw is seeded, hashed and verifiable by the player.")}
+               "Every box roll, stake and tournament draw is seeded, hashed and player-verifiable.")}
     <section class="section">
       <div class="container">
-        {section_head("How it works", "The Seed Chain")}
+        {section_head("Method", "The Seed Chain")}
         <div class="pf-steps">
           <div class="step rv"><h3>Server seed</h3>
-            <p>Before each season the server generates a random seed and publishes its
-            SHA-256 hash. The seed stays sealed until the reveal.</p></div>
+            <p>The server generates a seed each season and publishes its SHA-256 hash.
+            The seed stays sealed until reveal.</p></div>
           <div class="step rv"><h3>Your client seed</h3>
-            <p>Your client adds its own seed — visible to you, changeable any time in
-            settings. Neither side alone can move the roll.</p></div>
+            <p>The client adds its own seed, visible and changeable in settings.
+            Neither side alone determines the roll.</p></div>
           <div class="step rv"><h3>The roll</h3>
-            <p>Roll = HMAC(server seed, client seed + nonce). The result decides your box,
-            your stake, your bracket. Then we publish the server seed to verify it all.</p></div>
+            <p>Roll = HMAC(server seed, client seed + nonce), deciding box, stake and
+            bracket. The server seed is published afterward for verification.</p></div>
         </div>
         <div class="panel rv" style="max-width:860px;margin:34px auto 0">
           <div class="panel-head"><h3>Verify a roll yourself</h3><div class="r">Season 1 demo</div></div>
@@ -1435,14 +1414,13 @@ def build_provablyfair():
               <input class="input" value="golden-skull" readonly></div>
             <div class="field"><label>Example roll — Gold Mystery Box</label>
               <div class="hash-out">HMAC-SHA256 → 0.7412 → item tier 3 — Dragon claws</div></div>
-            <p class="small muted">When the season server goes live this panel runs the
-            real verification against the published seeds.</p>
+            <p class="small muted">At season launch this panel verifies against the published seeds.</p>
           </div>
         </div>
         <div class="note-strip" style="max-width:860px;margin:26px auto 0">
           <i class="bi bi-patch-check"></i>
-          <span>Hashes are committed before anyone plays and revealed after each season
-          week. If the hash does not verify, that week’s rolls are voided and comped.</span>
+          <span>Hashes are committed before play and revealed weekly. A hash that fails
+          verification voids and compensates that week&rsquo;s rolls.</span>
         </div>
       </div>
     </section>"""

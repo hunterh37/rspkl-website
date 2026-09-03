@@ -14,7 +14,37 @@
 
   var TICK_MS = 600;          // the game's tick, and therefore a frame's length
   var GRID = 17;              // MAX_RADIUS 8 either side of the base tile
-  var HIT_COLORS = ['#e02a1e', '#5fbfa4', '#7db2e0', '#f5d97a'];
+  /* The hit mask ids the world writes - HitMask.BLUE, RED, GREEN, YELLOW - are
+     the same ids the client indexes its hitsplat sprites by, so the site does
+     no mapping of its own: it draws the cache's sprite for the mask the cam
+     carries. The sprites are exported by `./gradlew -p client dumpSprites`,
+     which runs the client's own Sprite decoder rather than a second one. */
+  var SPLAT_BASE = '/assets/killcam/ui/hitmarks-';
+  var SPLAT_COUNT = 4;
+
+  function splatSprite(damage, hitType) {
+    // A hit with no mask on it is a hit that landed, which is the red splat;
+    // a zero always reads as the blue one, as it does in game.
+    var mask = damage === 0 ? 0 : (hitType >= 0 && hitType < SPLAT_COUNT ? hitType : 1);
+    return SPLAT_BASE + mask + '.png';
+  }
+
+  /* Sprites for the tile board, loaded once and drawn straight into the canvas.
+     A miss on the first frame must not draw an empty box while the PNG is in
+     flight, so a splat with no image yet is simply not drawn - the next frame
+     has it. */
+  var splatImages = {};
+
+  function splatImage(damage, hitType) {
+    var src = splatSprite(damage, hitType);
+    if (!splatImages[src]) {
+      var img = new Image();
+      img.src = src;
+      splatImages[src] = img;
+    }
+    var loaded = splatImages[src];
+    return loaded.complete && loaded.naturalWidth ? loaded : null;
+  }
 
   function $(s, c) { return (c || document).querySelector(s); }
   function el(tag, cls, html) {
@@ -210,8 +240,12 @@
     ctx.stroke();
 
     // Facing. The wedge is the one thing on screen that shows who was on whom.
-    if (!(f.faceDx === -1 && f.faceDy === -1) && (f.faceDx || f.faceDy)) {
-      var a = Math.atan2(f.faceDy, f.faceDx);
+    // The frame stores the tile being faced, in the same deltas as a position,
+    // so the direction is that tile minus this fighter's own - not the delta
+    // itself, which points out of the cam's base tile and turned both fighters
+    // the same way.
+    if (f.facing && (f.faceDx !== f.dx || f.faceDy !== f.dy)) {
+      var a = Math.atan2(f.faceDy - f.dy, f.faceDx - f.dx);
       ctx.fillStyle = ring;
       ctx.beginPath();
       ctx.moveTo(x + Math.cos(a) * r * 1.9, y + Math.sin(a) * r * 1.9);
@@ -222,12 +256,14 @@
     }
 
     if (f.hp >= 0) {
-      var bw = cell * 0.9, bh = Math.max(3, cell * 0.11);
+      // Thirty by five, green over red, as the client draws it - the shape is
+      // as much a part of recognising a Runescape fight as the hitsplat is.
+      var bw = cell * 0.75, bh = Math.max(3, bw / 6);
       var bx = x - bw / 2, by = y - r - bh * 2.2;
-      ctx.fillStyle = '#3a1512';
+      ctx.fillStyle = '#ff0000';
       ctx.fillRect(bx, by, bw, bh);
-      ctx.fillStyle = f.hp > 50 ? '#8fd46a' : f.hp > 20 ? '#f5d97a' : '#e02a1e';
-      ctx.fillRect(bx, by, bw * (f.hp / 100), bh);
+      ctx.fillStyle = '#00ff00';
+      ctx.fillRect(bx, by, bw * (Math.min(100, f.hp) / 100), bh);
     }
 
     ctx.fillStyle = '#d8ccb4';
@@ -244,15 +280,21 @@
     var ctx = this.ctx;
     var rise = (this.t - Math.floor(this.t)) * cell * 0.5;
     var x = toPx(at.x), y = toPx(at.y) - cell * 0.55 - rise;
-    var size = Math.max(11, Math.round(cell * 0.46));
-    ctx.font = '700 ' + size + 'px "IBM Plex Mono", monospace';
+    var sprite = splatImage(f.damage, f.hitType);
+    var size = Math.max(18, Math.round(cell * 0.8));
+    if (sprite) {
+      ctx.imageSmoothingEnabled = false;
+      ctx.drawImage(sprite, x - size / 2, y - size / 2, size, size * (23 / 24));
+      ctx.imageSmoothingEnabled = true;
+    }
+    var text = String(f.damage);
+    ctx.font = '700 ' + Math.max(10, Math.round(size * 0.5)) + 'px "IBM Plex Mono", monospace';
     ctx.textAlign = 'center';
     ctx.lineWidth = 3;
-    ctx.strokeStyle = 'rgba(0,0,0,.75)';
-    var text = f.damage === 0 ? 'block' : String(f.damage);
-    ctx.strokeText(text, x, y);
-    ctx.fillStyle = f.damage === 0 ? '#7db2e0' : (HIT_COLORS[f.hitType] || '#e02a1e');
-    ctx.fillText(text, x, y);
+    ctx.strokeStyle = 'rgba(0,0,0,.85)';
+    ctx.strokeText(text, x, y + size * 0.17);
+    ctx.fillStyle = '#ffffff';
+    ctx.fillText(text, x, y + size * 0.17);
   };
 
   // ---- board --------------------------------------------------------------
@@ -374,9 +416,11 @@
             anim: anims.indexOf(i) >= 0 ? 422 : -1,
             gfx: -1, gfxHeight: -1,
             damage: hits[i] === undefined ? -1 : hits[i],
-            hitType: 0,
+            // Blue for a zero, red for a hit - the two masks a fight is mostly
+            // made of, so the sample draws the splats a real cam would.
+            hitType: hits[i] ? 1 : 0,
             hp: p[2],
-            faceDx: p[3], faceDy: p[4]
+            faceDx: p[3], faceDy: p[4], facing: true
           };
         })
       };
@@ -466,15 +510,18 @@
       if (!f.visible) { return; }
       var bar = '';
       if (f.hp >= 0) {
-        var cls = f.hp > 50 ? '' : (f.hp > 20 ? ' hurt' : ' dying');
-        bar = '<div class="kc-bar' + cls + '"><span style="width:' + f.hp + '%"></span></div>';
+        // Green over red, clamped, exactly as the client fills its two boxes.
+        bar = '<div class="kc-bar"><span style="width:' + Math.min(100, f.hp) + '%"></span></div>';
       }
       html += '<div class="kc-tag ' + f.key + '" style="left:' + f.x + '%;top:' + f.y + '%">' +
               escapeHtml(f.name) + bar + '</div>';
       if (f.damage >= 0) {
-        html += '<div class="kc-splat' + (f.damage === 0 ? ' miss' : '') +
-                '" style="left:' + f.x + '%;top:' + (f.y - 6) + '%">' +
-                (f.damage === 0 ? 'block' : f.damage) + '</div>';
+        // The hitsplat is the sprite the client draws for that hit mask, and
+        // the number rides on it - a zero is a blue splat with a 0 on it, not
+        // the word "block", because that is what a player sees in game.
+        html += '<div class="kc-splat" style="left:' + f.x + '%;top:' + (f.y + 6) +
+                '%;background-image:url(' + splatSprite(f.damage, f.hitType) + ')">' +
+                f.damage + '</div>';
       }
     });
     host.innerHTML = html;

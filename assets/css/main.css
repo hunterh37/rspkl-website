@@ -1016,16 +1016,24 @@ tr.r1{background:rgba(201,143,20,.08)}
 }
 .kc-tag.killer{color:var(--gold-hi)}
 .kc-tag.victim{color:#e8776f}
-.kc-bar{width:64px;height:4px;margin:3px auto 0;background:#3a1512;border-radius:2px;overflow:hidden}
-.kc-bar span{display:block;height:100%;background:#8fd46a}
-.kc-bar.hurt span{background:var(--gold)}
-.kc-bar.dying span{background:#e02a1e}
+/* The hitpoints bar the game draws: thirty pixels wide, five tall, pure green
+   over pure red, no radius and no gradient - Client#drawEntities fills two
+   boxes of 65280 and 0xff0000 and nothing else. */
+.kc-bar{width:30px;height:5px;margin:3px auto 0;background:#f00;overflow:hidden}
+.kc-bar span{display:block;height:100%;background:#0f0}
+/* A hitsplat is the cache's own sprite with the damage over it, so the site
+   shows what the client shows rather than a coloured circle that resembles it.
+   The sprite is 24x23 and the number sits on its middle, as the client's
+   smallText does at spriteDrawY + 3. */
 .kc-splat{
-  position:absolute;transform:translate(-50%,-100%);
-  font-family:var(--font-mono);font-size:15px;font-weight:700;color:#fff;
-  text-shadow:0 0 4px rgba(0,0,0,.95);
+  position:absolute;transform:translate(-50%,-50%);
+  width:24px;height:23px;
+  background-repeat:no-repeat;background-size:24px 23px;
+  image-rendering:pixelated;
+  font-family:var(--font-mono);font-size:12px;font-weight:700;line-height:23px;
+  text-align:center;color:#fff;
+  text-shadow:1px 1px 0 #000,-1px 0 0 #000,0 -1px 0 #000;
 }
-.kc-splat.miss{color:#7db2e0}
 .kc-loading{
   position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
   font-family:var(--font-mono);font-size:11px;letter-spacing:.14em;

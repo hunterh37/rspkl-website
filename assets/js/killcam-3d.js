@@ -330,6 +330,30 @@ Stage.prototype.draw = function () {
   if (this.overlay) { this.overlay(this.readout()); }
 };
 
+/* Which way a fighter should be looking on this tick, in cam tile deltas.
+
+   The recorded facing tile is the server's, and it lags: a fighter who has just
+   been hit, or who is mid swing, can still be carrying the tile they turned to
+   two ticks ago, which draws two men trading hits back to back. The other
+   fighter's own tile is the ground truth for a duel, so it wins whenever both
+   are on the board and standing apart; the recorded tile is the fallback for a
+   replay with a single fighter in it. */
+Stage.prototype.faceDirection = function (fighter, at) {
+  var self_ = this, foe = null;
+  this.fighters.forEach(function (other) {
+    if (foe || other === fighter) { return; }
+    var oat = anim.positionAt(other.frames, self_.t);
+    if (!oat || (oat.x === at.x && oat.y === at.y)) { return; }
+    foe = { dx: oat.x - at.x, dy: oat.y - at.y };
+  });
+  if (foe) { return foe; }
+  var face = at.frame;
+  if (face.facing && (face.faceDx !== face.dx || face.faceDy !== face.dy)) {
+    return { dx: face.faceDx - face.dx, dy: face.faceDy - face.dy };
+  }
+  return null;
+};
+
 Stage.prototype.pose = function (fighter) {
   var at = anim.positionAt(fighter.frames, this.t);
   if (!at) {
@@ -342,14 +366,12 @@ Stage.prototype.pose = function (fighter) {
   // position rather than toward it.
   fighter.object.position.set(at.x * TILE, 0, -at.y * TILE);
 
-  // A frame stores the tile a fighter is turned towards, in the cam's own
-  // deltas - so the direction they face is that tile minus the one they are
-  // standing on. Reading the delta as a direction points every fighter out of
-  // the cam's base tile instead, which stood two men in a fight shoulder to
-  // shoulder facing the same way.
-  var face = at.frame;
-  if (face.facing && (face.faceDx !== face.dx || face.faceDy !== face.dy)) {
-    fighter.object.rotation.y = Math.atan2(face.faceDx - face.dx, -(face.faceDy - face.dy));
+  var dir = this.faceDirection(fighter, at);
+  if (dir) {
+    // World X follows the cam's X, world Z is the negated cam Y, and the model
+    // is built looking down -Z at a yaw of zero - so the yaw that puts its face
+    // on the target tile is the world heading turned half a circle.
+    fighter.object.rotation.y = Math.atan2(-dir.dx * TILE, dir.dy * TILE);
   }
 
   var pose = anim.poseFor(fighter, this.t);

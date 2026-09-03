@@ -22,7 +22,13 @@
 }(typeof self !== 'undefined' ? self : this, function () {
   'use strict';
 
-  var PACK_MAGIC = 0x4B435031; // 'KCP1', on the pack only
+  /* On the pack only, and it carries the version. V2 appends the ladder's four
+     numbers to every cam, and four numbers at the end of a cam inside a pack of
+     twenty are only unambiguous if every cam has them - so the magic says
+     which, exactly as KillcamCodec does. A V1 pack still reads, with its cams
+     carrying no rating. */
+  var PACK_MAGIC_V1 = 0x4B435031; // 'KCP1'
+  var PACK_MAGIC = 0x4B435032;    // 'KCP2'
 
   function Reader(bytes) { this.b = bytes; this.p = 0; }
 
@@ -33,6 +39,7 @@
     if (this.p + n > this.b.length) { throw new Error('killcam: buffer ended early'); }
   };
   Reader.prototype.u8 = function () { this.need(1); return this.b[this.p++]; };
+  Reader.prototype.left = function () { return this.b.length - this.p; };
   Reader.prototype.s8 = function () { var v = this.u8(); return v > 127 ? v - 256 : v; };
   Reader.prototype.u16 = function () {
     this.need(2);
@@ -100,7 +107,7 @@
     return { name: nameFromLong(hi, lo), appearanceBytes: appearance, frames: list };
   }
 
-  function readCam(r) {
+  function readCam(r, rated) {
     var cam = {
       id: r.u32(), epochSeconds: r.u32(), baseX: r.u16(), baseY: r.u16(),
       plane: r.u8(), wildernessLevel: r.u8(),
@@ -113,16 +120,72 @@
     cam.killer = readActor(r, frames);
     cam.victim = readActor(r, frames);
     cam.frames = frames;
+    cam.rating = rated ? readRating(r) : null;
     return cam;
+  }
+
+  /* What the ladder did about the kill: both ratings as they stood after it,
+     and the signed move each rating made. Last in the cam, so a reader that
+     does not want them simply stops - and a cam that ends before them was
+     written by a server from before the ladder rode along, which reads as no
+     rating rather than as a broken replay.
+
+     `rated` is read off the moves and not the ratings: two rated players can
+     hold any pair of ratings, but only an unrated kill moves neither of them.
+     The ratings before the fight are the difference, which is why they are not
+     on the wire. */
+  function readRating(r) {
+    // Exactly six, not at least six. A cam is followed by its rating and by
+    // nothing else, so anything longer is not a cam with a rating on it - it
+    // is a pack body, whose next cam's id would otherwise be read as a rating
+    // and drawn as a tier nobody holds. A cam whose tail is missing was
+    // written by a server from before the ladder rode along: the fight is
+    // unharmed, there is simply no score.
+    if (r.left() !== 6) { return null; }
+    var killer = r.u16();
+    var victim = r.u16();
+    var killerMove = r.s8();
+    var victimMove = r.s8();
+    return {
+      killerRating: killer, victimRating: victim,
+      killerMove: killerMove, victimMove: victimMove,
+      killerBefore: killer - killerMove, victimBefore: victim - victimMove,
+      rated: killerMove !== 0 || victimMove !== 0
+    };
   }
 
   /** One cam, as the API serves it. Null rather than a throw: a cam that will
       not decode costs a replay, and must not cost the page. */
   function decodeCam(bytes) {
     try {
-      return readCam(new Reader(bytes));
+      // The wire form has no magic and is always the current version: the
+      // page is deployed against the server that writes it. A cam with no
+      // tail still decodes, and reads as carrying no rating.
+      return readCam(new Reader(bytes), true);
     } catch (e) {
       return null;
+    }
+  }
+
+  /**
+   * How many bytes the first cam in a buffer occupies, ignoring any rating.
+   *
+   * The decoder measuring itself. A cam's length is not a field - it is the sum
+   * of a fixed header, two length-prefixed appearance blocks and however much
+   * each frame's presence byte says is there - so anything that needs one cam's
+   * bytes out of a pack has to walk the format, and a second walk written
+   * beside this one would be a second decoder free to drift. Used by tests and
+   * tooling; the page is handed one cam at a time.
+   *
+   * Returns 0 for a buffer that is not a cam.
+   */
+  function camLength(bytes) {
+    try {
+      var r = new Reader(bytes);
+      readCam(r, false);
+      return r.p;
+    } catch (e) {
+      return 0;
     }
   }
 
@@ -131,10 +194,12 @@
     var out = [];
     try {
       var r = new Reader(bytes);
-      if (r.u32() !== PACK_MAGIC) { return []; }
+      var magic = r.u32();
+      if (magic !== PACK_MAGIC && magic !== PACK_MAGIC_V1) { return []; }
+      var rated = magic === PACK_MAGIC;
       var count = r.u8();
       for (var i = 0; i < count; i++) {
-        out.push(readCam(r));
+        out.push(readCam(r, rated));
       }
     } catch (e) {
       // As in KillcamCodec: a pack that stops early yields the cams that were
@@ -221,6 +286,7 @@
   return {
     decodeCam: decodeCam,
     decodePack: decodePack,
+    camLength: camLength,
     parseAppearance: parseAppearance,
     nameFromLong: nameFromLong,
     SLOTS: SLOTS,

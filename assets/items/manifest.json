@@ -1,0 +1,12 @@
+{
+  "cell": 32,
+  "cols": 16,
+  "rows": 32,
+  "shardBits": 9,
+  "shards": 59,
+  "icons": 30008,
+  "missing": 0,
+  "items": 30008,
+  "sheetBytes": 8439713,
+  "version": "67c4caa74f7b"
+}

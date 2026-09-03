@@ -297,6 +297,59 @@
     ctx.fillText(text, x, y + size * 0.17);
   };
 
+  /* The ladder's tiers, mirroring EloRank
+     (server/game/.../game/content/elo/EloRank.java): a floor, a title, and the
+     real item whose model the game draws as that tier's emblem. The emblem is
+     an item id, so the site can show a tier the same way it shows a weapon -
+     the client's own render of a bronze med helm through a dragon chainbody -
+     rather than painting eight badges that would have to be redrawn every time
+     a tier is added.
+
+     Edited together with EloRank and with the client's MenuRank. */
+  var RANKS = [
+    { title: 'Bronze', floor: 0, emblem: 1155 },
+    { title: 'Iron', floor: 1100, emblem: 1153 },
+    { title: 'Steel', floor: 1250, emblem: 1157 },
+    { title: 'Black', floor: 1400, emblem: 1165 },
+    { title: 'Mithril', floor: 1550, emblem: 1159 },
+    { title: 'Adamant', floor: 1700, emblem: 1161 },
+    { title: 'Rune', floor: 1850, emblem: 1163 },
+    { title: 'Dragon', floor: 2000, emblem: 11335 }
+  ];
+
+  /* The tier a rating falls in, or null when there is no rating to show. A
+     rating at or below zero is a cam from before the ladder rode with cams,
+     which is an absence and not a Bronze. */
+  function rankOf(rating) {
+    if (!(rating > 0)) { return null; }
+    var found = RANKS[0];
+    for (var i = 0; i < RANKS.length; i++) {
+      if (rating >= RANKS[i].floor) { found = RANKS[i]; }
+    }
+    return found;
+  }
+
+  /* A signed move, as a player reads it. Zero is not "+0": an unrated kill is
+     a deliberate statement by the world - a farmed alt, a repeat victim, a
+     player still inside the intro - and a zero pretending to be a result reads
+     as a bug. */
+  function moveText(move) {
+    if (!move) { return 'unrated'; }
+    return move > 0 ? '+' + move : String(move);
+  }
+
+  function moveClass(move) {
+    if (!move) { return 'flat'; }
+    return move > 0 ? 'up' : 'down';
+  }
+
+  /* An item's real inventory icon, out of the sheets the client exported. An
+     empty string where the loader is not on the page, so a row is a row of
+     text rather than a hole. */
+  function icon(id, cls, title) {
+    return window.KillcamIcons ? window.KillcamIcons.icon(id, cls, title) : '';
+  }
+
   // ---- board --------------------------------------------------------------
 
   var state = { sort: 'top', page: 1, cams: [], live: false };
@@ -313,13 +366,30 @@
 
   function cardHtml(c, rank) {
     var wild = c.wildernessLevel ? 'Wilderness ' + c.wildernessLevel : 'Wilderness';
+    // The card carries the weapon's id as well as its name, so the row shows
+    // the item rather than describing it. A card with no id - a sample, or a
+    // fighter who killed unarmed - draws the name alone.
+    var weapon = c.weapon >= 0
+      ? '<span class="kc-weapon-chip">' + icon(c.weapon, '', c.weaponName) +
+        '<span>' + escapeHtml(c.weaponName) + '</span></span>'
+      : '<span>' + escapeHtml(c.weaponName || 'Unarmed') + '</span>';
+    // What the kill was worth, if the world said. The card carries the killer's
+    // rating and move as columns of their own - the board prints them, and a
+    // query that had to decode a replay to read a rating could not sort by it.
+    var tier = rankOf(c.killerRating);
+    var ladder = tier
+      ? '<span class="kc-rank-chip" title="' + escapeHtml(tier.title + ' tier') + '">' +
+        icon(tier.emblem, 'tier', tier.title + ' tier') +
+        '<span>' + tier.title + ' ' + c.killerRating + '</span>' +
+        '<em class="' + moveClass(c.killerMove) + '">' + moveText(c.killerMove) + '</em></span>'
+      : '';
     return '' +
       '<div class="kc-rank">' + (state.sort === 'top' ? '#' + rank : ago(c.killedAt)) + '</div>' +
       '<div class="kc-body">' +
       '  <div class="kc-names"><b>' + c.killer + '</b> <i class="bi bi-caret-right-fill"></i> ' +
       '    <span>' + c.victim + '</span></div>' +
       '  <div class="kc-meta">' +
-      '    <span>' + c.weaponName + '</span>' +
+      '    ' + weapon + ladder +
       '    <span>' + c.killingBlow + ' dmg blow</span>' +
       '    <span>' + c.hitpointsLeft + '% hp left</span>' +
       '    <span>' + wild + '</span>' +
@@ -388,14 +458,19 @@
   }
 
   function sampleCards() {
+    // The weapon ids are real ones, so the sample board draws the same item
+    // icons a live board does - the sheets are static assets and do not
+    // depend on the API the sample stands in for.
     var demo = [
-      ['Sudden Death', 'Ags Rushed', 'Armadyl godsword', 47, 62, 34, 128],
-      ['Void Pray', 'Tank Btw', 'Dragon claws', 41, 18, 51, 96],
-      ['Zerk Andy', 'Pure Rage', 'Granite maul', 33, 44, 29, 71]
+      ['Sudden Death', 'Ags Rushed', 'Armadyl godsword', 47, 62, 34, 128, 11802, 2043, 14],
+      ['Void Pray', 'Tank Btw', 'Dragon claws', 41, 18, 51, 96, 13652, 1662, 21],
+      ['Zerk Andy', 'Pure Rage', 'Granite maul', 33, 44, 29, 71, 4153, 1188, 9]
     ];
     return demo.map(function (d, i) {
       return {
         id: 'sample-' + i, killer: d[0], victim: d[1], weaponName: d[2],
+        weapon: d[7], killerRating: d[8], killerMove: d[9],
+        victimRating: d[8] - 60, victimMove: -d[9],
         killingBlow: d[3], hitpointsLeft: d[4], wildernessLevel: d[5], votes: d[6],
         killerCombat: 126, victimCombat: 118, frames: 9, voted: false,
         killedAt: new Date(Date.now() - (i + 1) * 5400000).toISOString(),
@@ -549,38 +624,276 @@
     if (next === 'tiles' && player && player.cam) { player.resize(); player.draw(); }
   }
 
-  /* What each fighter was wearing. The names come from the item definitions the
-     export ships, keyed by the ids in the appearance block - the same lookup
-     the replay does to find their models, so the list and the figure can never
-     disagree about what someone had on. */
-  function renderGear(cam) {
-    var host = $('#kc-gear');
+  /* The scoreboard under the stage: who fought, in what, and what landed.
+
+     Every number and every picture here is a field the world recorded at the
+     moment of the kill. Gear comes out of the appearance block the cam carries,
+     which is the same block the replay dresses the figures from, so the board
+     and the fight cannot disagree about what someone had on. The icons are the
+     client's own inventory renders, the hitsplats are the client's own sprites,
+     and the head icons are the cache's - nothing on this panel is a shape drawn
+     in CSS to resemble something the game draws. */
+
+  /* The paperdoll, in the shape a player's own equipment tab is in. The
+     appearance block carries twelve slots and no ammunition or ring, so the
+     grid is the familiar one with the sleeve slot where ammunition sits. A null
+     is a gap in the grid rather than an empty slot. */
+  var DOLL = [
+    [null, 'head', null],
+    ['cape', 'amulet', 'arms'],
+    ['weapon', 'body', 'shield'],
+    [null, 'legs', null],
+    ['hands', 'feet', 'beard']
+  ];
+
+  /* What a slot is called on the board. The block's own names are the
+     renderer's; these are the game's. */
+  var SLOT_LABEL = {
+    head: 'Head', cape: 'Cape', amulet: 'Neck', arms: 'Sleeves', weapon: 'Weapon',
+    body: 'Body', shield: 'Shield', legs: 'Legs', hands: 'Hands', feet: 'Feet',
+    beard: 'Jaw', hair: 'Hair'
+  };
+
+  /** An item's real name, out of the definitions the export ships. */
+  function itemName(defs, id) {
+    var def = id === undefined || id < 0 ? null : defs[id];
+    return def && def[0] ? def[0] : '';
+  }
+
+  /**
+   * One fighter's tale of the fight, from their own frames.
+   *
+   * A frame's damage is the hitsplat that was drawn *on* that fighter, so what
+   * a fighter dealt is read off the other one's frames. Only the totals that
+   * the recording actually supports are computed: there is no accuracy here,
+   * because a cam holds the hits that landed and not the swings that missed.
+   */
+  function tally(frames) {
+    var out = { taken: 0, hits: 0, blocks: 0, max: 0, hp: -1, first: -1 };
+    for (var i = 0; i < frames.length; i++) {
+      var f = frames[i];
+      if (f.hp >= 0) { out.hp = f.hp; }
+      if (f.damage < 0) { continue; }
+      out.taken += f.damage;
+      if (f.damage === 0) { out.blocks++; } else { out.hits++; }
+      if (f.damage > out.max) { out.max = f.damage; }
+      if (out.first < 0) { out.first = i; }
+    }
+    return out;
+  }
+
+  /* A head icon is the cache's own sprite, indexed exactly as the client
+     indexes it: headicons_prayer by the overhead prayer, headicons_pk by the
+     skull. Both read -1 when nothing is set. */
+  function headIcon(kind, index, title) {
+    if (!(index >= 0)) { return ''; }
+    return '<i class="kc-head" title="' + escapeHtml(title) + '" role="img"' +
+           ' aria-label="' + escapeHtml(title) + '"' +
+           ' style="background-image:url(/assets/killcam/ui/headicons_' + kind +
+           '-' + index + '.png)"></i>';
+  }
+
+  /** One fighter's column: identity, what they landed, and the paperdoll. */
+  function sideMarkup(side, defs, won, hp) {
+    var look = side.look;
+    var rows = DOLL.map(function (row) {
+      return '<div class="kc-doll-row">' + row.map(function (slot) {
+        if (!slot) { return '<span class="kc-slot gap"></span>'; }
+        var worn = look ? look.items[slot] : undefined;
+        var name = itemName(defs, worn);
+        if (!(worn >= 0)) {
+          // Empty, or an identity kit showing through - a bare arm is not a
+          // piece of equipment, so it draws as an empty slot either way.
+          return '<span class="kc-slot" title="' + escapeHtml(SLOT_LABEL[slot] || slot) + '"></span>';
+        }
+        return '<span class="kc-slot on" title="' + escapeHtml(name || SLOT_LABEL[slot] || slot) + '">' +
+               icon(worn, '', name || SLOT_LABEL[slot]) + '</span>';
+      }).join('') + '</div>';
+    }).join('');
+
+    // What this fighter landed is read off the other one's frames: a frame's
+    // damage is the hitsplat that was drawn on the fighter it belongs to.
+    var out = side.dealt;
+    var bar = Math.max(0, Math.min(100, hp));
+    return '<div class="kc-side ' + side.key + '">' +
+      '<div class="kc-who-line">' +
+        headIcon('pk', look && look.skullIcon >= 0 ? look.skullIcon : -1, 'Skulled') +
+        headIcon('prayer', look && look.prayerIcon >= 0 ? look.prayerIcon : -1, 'Overhead prayer') +
+        '<b>' + escapeHtml(side.name || (side.key === 'killer' ? 'Killer' : 'Victim')) + '</b>' +
+      '</div>' +
+      '<div class="kc-who-sub">' +
+        '<span class="kc-tagline ' + (won ? 'win' : 'loss') + '">' + (won ? 'Winner' : 'Defeated') + '</span>' +
+        '<span>Lvl ' + (look ? look.combat : side.combat || 0) + '</span>' +
+      '</div>' +
+      '<div class="kc-hp"><div class="kc-hp-bar"><span style="width:' + bar + '%"></span></div>' +
+        '<em>' + bar + '%</em></div>' +
+      ratingRow(side.rating, side.move) +
+      '<div class="kc-mini">' +
+        '<div><span>Dealt</span><b>' + out.taken + '</b></div>' +
+        '<div><span>Max</span><b>' + out.max + '</b></div>' +
+        '<div><span>Hits</span><b>' + out.hits + '</b></div>' +
+      '</div>' +
+      '<div class="kc-doll">' + rows + '</div>' +
+    '</div>';
+  }
+
+  /**
+   * A fighter's league standing after the kill: the tier's own emblem, the
+   * tier, the rating, and what this fight moved it by.
+   *
+   * The rating before is not printed beside the one after - a card is read at a
+   * glance and two four-digit numbers next to each other are two things to
+   * compare rather than one thing to read - but it is on the tooltip, because
+   * the move and the rating are the same statement seen twice and someone
+   * checking a ladder wants both.
+   */
+  function ratingRow(rating, move) {
+    var rank = rankOf(rating);
+    if (!rank) {
+      // No rating on the cam at all: one written before the ladder rode with
+      // them. Nothing true to say, so nothing is said.
+      return '';
+    }
+    var before = rating - move;
+    return '<div class="kc-rank-row" title="' + escapeHtml(rank.title + ' \u00b7 ' + before +
+             ' to ' + rating) + '">' +
+      icon(rank.emblem, 'tier', rank.title + ' tier') +
+      '<span class="kc-rank-name">' + escapeHtml(rank.title) + '</span>' +
+      '<b>' + rating + '</b>' +
+      '<em class="' + moveClass(move) + '">' + moveText(move) + '</em>' +
+    '</div>';
+  }
+
+  /**
+   * The tape: one column per recorded tick, both fighters' hitsplats on it.
+   *
+   * This is the fight as the recording holds it - nine ticks, the splat the
+   * client would have drawn on each, the damage on top of it. The top row is
+   * what the killer landed, which is read off the victim's frames, because a
+   * frame's damage is the splat that was drawn on the fighter it belongs to. A
+   * column with nothing in it is a tick where neither man was hit, which is as
+   * much a part of reading a fight as the hits are, so it is drawn empty rather
+   * than skipped.
+   */
+  function tapeMarkup(cam, sides) {
+    var cols = '';
+    for (var t = 0; t < cam.frames; t++) {
+      var k = cam.killer.frames[t] || {}, v = cam.victim.frames[t] || {};
+      cols += '<button class="kc-tick" data-tick="' + t + '" type="button"' +
+              ' title="Tick ' + (t + 1) + ' &middot; ' + ((t * TICK_MS) / 1000).toFixed(1) + 's">' +
+              splatCell(v.damage, v.hitType, 'k') +
+              splatCell(k.damage, k.hitType, 'v') +
+              '<em>' + (t + 1) + '</em></button>';
+    }
+    return '<div class="kc-tape" id="kc-tape">' +
+      '<div class="kc-tape-key">' +
+        '<span class="k">' + escapeHtml(sides[0].name || 'Killer') + ' landed</span>' +
+        '<span class="v">' + escapeHtml(sides[1].name || 'Victim') + ' landed</span>' +
+      '</div>' +
+      '<div class="kc-tape-cols">' + cols + '</div></div>';
+  }
+
+  /* One cell of the tape. The splat is the sprite the client draws for that hit
+     mask with the number riding on it, which is why a zero is a blue splat with
+     a 0 on it and not the word "block". */
+  function splatCell(damage, hitType, who) {
+    if (!(damage >= 0)) { return '<span class="kc-cell ' + who + ' none"></span>'; }
+    return '<span class="kc-cell ' + who + '">' +
+           '<span class="kc-splat-s" style="background-image:url(' +
+           splatSprite(damage, hitType) + ')">' + damage + '</span></span>';
+  }
+
+  /** The tiles: the scalars about the kill rather than about a fighter. */
+  function tilesMarkup(cam, card, defs) {
+    var weapon = cam.weapon >= 0 ? cam.weapon : -1;
+    var weaponName = itemName(defs, weapon) || card.weaponName || 'Unarmed';
+    var blow = card.killingBlow != null ? card.killingBlow : cam.killingBlow;
+    var tiles = [
+      ['Killing blow', blow, 'damage'],
+      ['HP left', (cam.hitpointsLeft != null ? cam.hitpointsLeft : 0) + '%', 'on the winner'],
+      ['Wilderness', cam.wildernessLevel || card.wildernessLevel || 0, 'level'],
+      ['Recorded', ((cam.frames * TICK_MS) / 1000).toFixed(1) + 's', cam.frames + ' ticks']
+    ];
+    return '<div class="kc-weapon">' +
+        icon(weapon, 'big', weaponName) +
+        '<div><span>Killing weapon</span><b>' + escapeHtml(weaponName) + '</b></div>' +
+      '</div>' +
+      '<div class="kc-tiles">' + tiles.map(function (t) {
+        return '<div class="kc-tile"><span>' + t[0] + '</span><b>' + t[1] +
+               '</b><em>' + t[2] + '</em></div>';
+      }).join('') + '</div>';
+  }
+
+  /**
+   * Draw the whole board for a cam.
+   *
+   * The item definitions are fetched for exactly the ids the two blocks name -
+   * the same lookup the replay does to find their models - so the names on the
+   * board and the models on the stage come out of one read of one table.
+   */
+  function renderScoreboard(cam, card) {
+    var host = $('#kc-scoreboard');
     if (!host || !window.KillcamAssets) { return; }
     var sides = [
-      { key: 'killer', title: cam.killer.name || 'Killer', look: camApi.parseAppearance(cam.killer.appearanceBytes) },
-      { key: 'victim', title: cam.victim.name || 'Victim', look: camApi.parseAppearance(cam.victim.appearanceBytes) }
+      { key: 'killer', name: cam.killer.name || card.killer,
+        combat: cam.killerCombat, look: camApi.parseAppearance(cam.killer.appearanceBytes) },
+      { key: 'victim', name: cam.victim.name || card.victim,
+        combat: cam.victimCombat, look: camApi.parseAppearance(cam.victim.appearanceBytes) }
     ];
+    cam.killer.stat = tally(cam.killer.frames);
+    cam.victim.stat = tally(cam.victim.frames);
+    sides[0].stat = cam.killer.stat;
+    sides[1].stat = cam.victim.stat;
+
     var ids = [];
     sides.forEach(function (side) {
       if (!side.look) { return; }
       Object.keys(side.look.items).forEach(function (slot) { ids.push(side.look.items[slot]); });
     });
-    if (!ids.length) { host.innerHTML = ''; return; }
+    if (cam.weapon >= 0) { ids.push(cam.weapon); }
+    if (window.KillcamIcons) { window.KillcamIcons.warm(ids); }
 
-    window.KillcamAssets.defs('items', ids).then(function (defs) {
-      host.innerHTML = sides.map(function (side) {
-        if (!side.look) { return ''; }
-        var rows = camApi.SLOTS.map(function (slot) {
-          var id = side.look.items[slot];
-          var def = id === undefined ? null : defs[id];
-          if (!def || !def[0]) { return ''; }
-          return '<li>' + escapeHtml(def[0]) + '<span>' + slot + '</span></li>';
-        }).join('');
-        var skull = side.look.skullIcon >= 0 ? '<li class="skull">Skulled<span>risk</span></li>' : '';
-        return '<div class="' + side.key + '"><h4>' + escapeHtml(side.title) +
-               ' &middot; lvl ' + side.look.combat + '</h4><ul>' + rows + skull + '</ul></div>';
-      }).join('');
-    }).catch(function () { host.innerHTML = ''; });
+    // A fighter's output is the other one's frames, and the hitpoints on the
+    // panel are the cam's own statement about the kill rather than the last
+    // bar a frame happened to carry: the winner ended on hpLeft, and the
+    // loser ended dead, which is the one thing every cam agrees on.
+    sides[0].dealt = cam.victim.stat;
+    sides[1].dealt = cam.killer.stat;
+    // The ladder's own numbers, off the tail of the cam. A cam with no tail -
+    // one written before the ladder rode along - leaves these at zero, and
+    // ratingRow draws nothing rather than a Bronze nobody was.
+    var ladder = cam.rating || { killerRating: 0, victimRating: 0, killerMove: 0, victimMove: 0 };
+    sides[0].rating = ladder.killerRating;
+    sides[0].move = ladder.killerMove;
+    sides[1].rating = ladder.victimRating;
+    sides[1].move = ladder.victimMove;
+    var left = cam.hitpointsLeft != null ? cam.hitpointsLeft : 100;
+
+    var draw = function (defs) {
+      host.innerHTML =
+        '<div class="kc-sides">' +
+          sideMarkup(sides[0], defs, true, left) +
+          sideMarkup(sides[1], defs, false, 0) +
+        '</div>' +
+        tapeMarkup(cam, sides) +
+        tilesMarkup(cam, card, defs);
+    };
+
+    if (!ids.length) { draw({}); return; }
+    window.KillcamAssets.defs('items', ids)
+      .then(draw)
+      .catch(function () { draw({}); });
+  }
+
+  /* Which column of the tape is the tick on screen. Set by playback as well as
+     by a click, so the tape reads as a playhead rather than as a static list. */
+  function markTick(at) {
+    var tape = $('#kc-tape');
+    if (!tape) { return; }
+    var index = Math.round(at);
+    Array.prototype.forEach.call(tape.querySelectorAll('[data-tick]'), function (b) {
+      b.classList.toggle('now', Number(b.getAttribute('data-tick')) === index);
+    });
   }
 
   function openViewer(id) {
@@ -590,23 +903,20 @@
     modal.classList.add('open');
     document.body.style.overflow = 'hidden';
     $('#kc-modal-title').innerHTML = '<b>' + escapeHtml(card.killer) + '</b> vs ' + escapeHtml(card.victim);
-    $('#kc-modal-stats').innerHTML =
-      '<span>' + escapeHtml(card.weaponName) + '</span><span>' + card.killingBlow + ' dmg killing blow</span>' +
-      '<span>' + card.hitpointsLeft + '% hp left</span>' +
-      '<span>Lvl ' + card.killerCombat + ' vs ' + card.victimCombat + '</span>' +
-      '<span>Wilderness ' + card.wildernessLevel + '</span>';
     var vb = $('#kc-modal-vote');
     vb.setAttribute('data-vote', card.id);
     vb.classList.toggle('on', !!card.voted);
     vb.innerHTML = '<i class="bi bi-caret-up-fill"></i><b>' + card.votes + '</b>';
-    $('#kc-gear').innerHTML = '';
+    // The board is rebuilt from the cam once it decodes; until then it holds
+    // nothing rather than the last fight's numbers.
+    $('#kc-scoreboard').innerHTML = '';
 
     if (!player) {
       player = new Player($('#kc-canvas'));
       window.__killcamPlayer = player;
     }
     var scrub = $('#kc-scrub');
-    var tick = function (t) { scrub.value = String(Math.round(t * 100)); };
+    var tick = function (t) { scrub.value = String(Math.round(t * 100)); markTick(t); };
     player.onTick = tick;
 
     var loading = $('#kc-loading');
@@ -621,7 +931,7 @@
       scrub.max = String((cam.frames - 1) * 100);
       scrub.value = '0';
       player.load(cam);
-      renderGear(cam);
+      renderScoreboard(cam, card);
 
       if (cam.sample || !stageAvailable()) {
         // No WebGL, or no gzip stream to unpack the meshes with. The tile board
@@ -687,7 +997,30 @@
   document.addEventListener('DOMContentLoaded', function () {
     if (!$('#kc-list')) { return; }
 
+    // The item icon export's version, so a sheet URL is per-export: a
+    // re-export is a different URL and the same export is the same one.
+    var modalEl = $('#kc-modal');
+    if (modalEl && window.KillcamIcons) {
+      window.KillcamIcons.setVersion(modalEl.getAttribute('data-items') || '');
+    }
+
     document.addEventListener('click', function (e) {
+      // A column of the tape is a tick of the fight, so clicking one seeks
+      // there - reading the hits and watching them are the same panel.
+      var t = e.target.closest('#kc-tape [data-tick]');
+      if (t) {
+        var active = current();
+        if (active && active.cam) {
+          active.pause();
+          active.seek(Number(t.getAttribute('data-tick')));
+          var scrubBar = $('#kc-scrub');
+          if (scrubBar) { scrubBar.value = String(Number(t.getAttribute('data-tick')) * 100); }
+          var playBtn = $('#kc-play');
+          if (playBtn) { playBtn.innerHTML = '<i class="bi bi-play-fill"></i>'; }
+          markTick(Number(t.getAttribute('data-tick')));
+        }
+        return;
+      }
       var v = e.target.closest('[data-vote]');
       if (v) { vote(v.getAttribute('data-vote'), v); return; }
       var w = e.target.closest('[data-watch]');

@@ -178,6 +178,22 @@ def killcam_version() -> str:
         return ""
 
 
+def item_icon_version() -> str:
+    """The version of the exported item icon sheets, if they are present.
+
+    Same contract as :func:`killcam_version`: the sheets are served immutable
+    and named by their shard, so the export's own digest is what makes a
+    re-render a different URL. Written by
+    ``./gradlew -p client dumpItemIcons``.
+    """
+    path = os.path.join(ROOT, "assets", "items", "manifest.json")
+    try:
+        with open(path) as fh:
+            return str(json.load(fh).get("version", ""))
+    except (IOError, ValueError):
+        return ""
+
+
 def scripts(extra_js: str, module_js: str) -> str:
     """Page scripts, in load order.
 
@@ -1014,7 +1030,8 @@ def build_killcams():
     </section>
 
     <div class="kc-modal" id="kc-modal" role="dialog" aria-modal="true"
-         aria-label="Killcam replay" data-assets="{killcam_version()}">
+         aria-label="Killcam replay" data-assets="{killcam_version()}"
+         data-items="{item_icon_version()}">
       <div class="kc-frame">
         <div class="kc-frame-head">
           <h3 id="kc-modal-title">Killcam</h3>
@@ -1044,8 +1061,7 @@ def build_killcams():
           <span><i class="kc-dot-v"></i> Victim</span>
           <span>Drag to orbit &middot; scroll to zoom &middot; 1 tile = 1 square</span>
         </div>
-        <div class="kc-frame-stats" id="kc-modal-stats"></div>
-        <div class="kc-gear" id="kc-gear"></div>
+        <div class="kc-scoreboard" id="kc-scoreboard"></div>
       </div>
     </div>"""
     page("killcams/index.html", "Top Killcams — RSPKL Replays | RuneScape PK League",
@@ -1053,7 +1069,8 @@ def build_killcams():
          "replayed tick by tick, and voted on by the league.", "killcams", content,
          extra_js=("assets/js/killcam-mesh.js assets/js/killcam-cam.js "
                    "assets/js/killcam-anim.js assets/js/killcam-figure.js "
-                   "assets/js/killcam-assets.js assets/js/killcams.js"),
+                   "assets/js/killcam-assets.js assets/js/killcam-icons.js "
+                   "assets/js/killcams.js"),
          module_js="assets/js/killcam-3d.js")
 
 

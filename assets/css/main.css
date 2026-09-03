@@ -954,6 +954,25 @@ tr.r1{background:rgba(201,143,20,.08)}
   font-family:var(--font-mono);font-size:10.5px;letter-spacing:.12em;
   text-transform:uppercase;color:var(--muted);
 }
+/* The killing weapon on a board row: the item's own icon beside its name. The
+   icon is a fixed 32px cell of a sheet, so it is scaled down by transform
+   rather than by width - a background-position would not move with it. */
+.kc-weapon-chip{display:inline-flex;align-items:center;gap:6px}
+.kc-weapon-chip .kc-icon{
+  width:32px;height:32px;flex:none;transform:scale(.62);margin:-9px -7px;
+}
+/* What the kill was worth, on a board row: the tier's own emblem item, the
+   tier and rating, and the move. Green up, red down, and a flat grey for an
+   unrated kill - a farmed alt or a repeat victim, which the world states
+   deliberately rather than leaving out. */
+.kc-rank-chip{display:inline-flex;align-items:center;gap:5px}
+.kc-rank-chip .kc-icon.tier{
+  width:32px;height:32px;flex:none;transform:scale(.56);margin:-9px -7px -9px -8px;
+}
+.kc-rank-chip em{font-style:normal;font-weight:600;margin-left:5px}
+.kc-rank-chip em.up,.kc-rank-row em.up{color:#7fbf6a}
+.kc-rank-chip em.down,.kc-rank-row em.down{color:#d2726a}
+.kc-rank-chip em.flat,.kc-rank-row em.flat{color:var(--muted)}
 .kc-actions{display:flex;align-items:center;gap:10px}
 .kc-vote{
   display:flex;flex-direction:column;align-items:center;justify-content:center;
@@ -981,9 +1000,27 @@ tr.r1{background:rgba(201,143,20,.08)}
   padding:24px;overflow-y:auto;
 }
 .kc-modal.open{display:flex;align-items:flex-start;justify-content:center}
+/* Wide enough for the fight and the scoreboard side by side, because reading a
+   fight is the point of the panel and a spectator should not have to scroll
+   from the hits to who took them. Below 1000px the two stack, stage first. */
 .kc-frame{
-  width:100%;max-width:620px;background:var(--panel);border:1px solid var(--line-gold);
+  width:100%;max-width:1120px;background:var(--panel);border:1px solid var(--line-gold);
   border-radius:6px;box-shadow:var(--shadow-1);overflow:hidden;
+  display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);
+  grid-template-areas:"head head" "stage board" "controls board" "legend board";
+  align-content:start;
+}
+.kc-frame-head{grid-area:head}
+.kc-stage{grid-area:stage}
+.kc-controls{grid-area:controls}
+.kc-legend{grid-area:legend}
+.kc-scoreboard{grid-area:board;border-left:1px solid var(--line);min-width:0}
+@media(max-width:1000px){
+  .kc-frame{
+    max-width:620px;grid-template-columns:minmax(0,1fr);
+    grid-template-areas:"head" "stage" "controls" "legend" "board";
+  }
+  .kc-scoreboard{border-left:0;border-top:1px solid var(--line)}
 }
 .kc-frame-head{
   display:flex;align-items:center;justify-content:space-between;gap:14px;
@@ -1040,29 +1077,170 @@ tr.r1{background:rgba(201,143,20,.08)}
   text-transform:uppercase;color:var(--muted);background:rgba(8,8,6,.7);
 }
 .kc-loading[hidden]{display:none}
-/* What each fighter was wearing, read out of the appearance block the cam
-   carries - the same bytes the replay dresses them in. */
-.kc-gear{
-  display:grid;grid-template-columns:1fr 1fr;gap:14px;
-  padding:0 16px 16px;border-top:1px solid var(--line);padding-top:14px;
+/* The scoreboard. Everything on it is a picture the game itself draws: the
+   equipment icons are the client's own inventory renders, exported by
+   `./gradlew -p client dumpItemIcons`; the hitsplats and head icons are the
+   cache's own sprites. Nothing here is a shape in CSS standing in for one. */
+
+/* An icon is one 32x32 cell of a 512-icon sheet, positioned by the loader. It
+   is pixel art at its native size, so it is never smoothed and never scaled. */
+.kc-icon{
+  display:block;width:32px;height:32px;
+  background-repeat:no-repeat;image-rendering:pixelated;
 }
-.kc-gear h4{
-  margin:0 0 8px;font-family:var(--font-mono);font-size:10px;letter-spacing:.14em;
-  text-transform:uppercase;font-weight:600;
+.kc-icon.big{width:32px;height:32px;transform:scale(1.35);transform-origin:center}
+
+/* A head icon - overhead prayer, or the skull - at the 25x25 the cache holds. */
+.kc-head{
+  display:inline-block;width:16px;height:16px;flex:none;
+  background-repeat:no-repeat;background-size:contain;image-rendering:pixelated;
 }
-.kc-gear .killer h4{color:var(--gold-2)}
-.kc-gear .victim h4{color:#c96a63}
-.kc-gear ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:3px}
-.kc-gear li{
-  display:flex;justify-content:space-between;gap:10px;
-  font-size:12.5px;color:var(--parch);
+
+.kc-sides{
+  display:grid;grid-template-columns:1fr 1fr;gap:1px;
+  background:var(--line);border-bottom:1px solid var(--line);
 }
-.kc-gear li span{
+.kc-side{background:var(--panel);padding:14px 14px 16px;min-width:0}
+.kc-who-line{display:flex;align-items:center;gap:6px;min-width:0}
+.kc-who-line b{
+  font-size:15px;color:var(--bone);font-weight:700;letter-spacing:.01em;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
+.kc-who-sub{
+  display:flex;align-items:center;gap:10px;margin-top:6px;
+  font-family:var(--font-mono);font-size:10px;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--muted);
+}
+.kc-tagline{padding:2px 6px;border-radius:3px;border:1px solid var(--line-2);font-weight:600}
+.kc-tagline.win{color:var(--gold-hi);border-color:var(--gold-3);background:rgba(201,143,20,.14)}
+.kc-tagline.loss{color:#c96a63;border-color:#4a2b28;background:rgba(201,106,99,.1)}
+
+/* The hitpoints the fighter was last recorded on, drawn as the game's bar -
+   pure green over pure red, no radius and no gradient. */
+.kc-hp{display:flex;align-items:center;gap:8px;margin-top:9px}
+.kc-hp-bar{flex:1;height:6px;background:#f00;overflow:hidden;min-width:0}
+.kc-hp-bar span{display:block;height:100%;background:#0f0}
+.kc-hp em{
+  font-family:var(--font-mono);font-size:10px;font-style:normal;color:var(--ash);
+  font-variant-numeric:tabular-nums;
+}
+
+/* The fighter's league standing after the kill. The tier is an item icon
+   because a tier is an item in this game - EloRank names the model the intro
+   deck already draws - so the board and the deck cannot show different
+   badges for the same rank. */
+.kc-rank-row{
+  display:flex;align-items:center;gap:2px;margin-top:10px;
+  padding:6px 8px;background:#171611;border:1px solid var(--line);border-radius:3px;
+}
+.kc-rank-row .kc-icon.tier{
+  width:32px;height:32px;flex:none;transform:scale(.66);margin:-8px -6px;
+}
+.kc-rank-name{
+  font-family:var(--font-mono);font-size:9.5px;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--ash);margin-left:6px;
+}
+.kc-rank-row b{
+  font-family:var(--font-mono);font-size:14px;font-weight:600;color:var(--bone);
+  font-variant-numeric:tabular-nums;margin-left:auto;
+}
+.kc-rank-row em{
+  font-family:var(--font-mono);font-size:11px;font-style:normal;font-weight:600;
+  font-variant-numeric:tabular-nums;margin-left:7px;min-width:34px;text-align:right;
+}
+
+/* What the fighter landed, from the other one's frames. */
+.kc-mini{display:flex;gap:1px;margin-top:11px;background:var(--line)}
+.kc-mini > div{
+  flex:1;background:#171611;padding:7px 8px 8px;display:flex;flex-direction:column;gap:1px;
+}
+.kc-mini span{
+  font-family:var(--font-mono);font-size:8.5px;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--muted);
+}
+.kc-mini b{
+  font-family:var(--font-mono);font-size:14px;font-weight:600;color:var(--bone);
+  font-variant-numeric:tabular-nums;line-height:1.1;
+}
+.kc-side.killer .kc-mini b{color:var(--gold)}
+.kc-side.victim .kc-mini b{color:#e0938c}
+
+/* The paperdoll, in the shape of a player's own equipment tab. */
+.kc-doll{margin-top:12px;display:flex;flex-direction:column;gap:4px;align-items:center}
+.kc-doll-row{display:flex;gap:4px}
+.kc-slot{
+  width:36px;height:36px;display:flex;align-items:center;justify-content:center;
+  background:#171611;border:1px solid var(--line);border-radius:3px;
+}
+.kc-slot.on{border-color:var(--gold-3);background:#1d1b13}
+.kc-slot.gap{background:none;border-color:transparent}
+
+/* The tape: one column per recorded tick, the splats that landed on it, and
+   the tick number. The column under the playhead is lit. */
+.kc-tape{padding:14px 14px 12px;border-bottom:1px solid var(--line)}
+/* The key names the two rows in the fighters' own colours, in row order: what
+   the killer landed on top, what the victim landed under it. */
+.kc-tape-key{
+  display:flex;flex-direction:column;gap:2px;margin-bottom:8px;
   font-family:var(--font-mono);font-size:9.5px;letter-spacing:.12em;
-  text-transform:uppercase;color:var(--muted);align-self:center;
+  text-transform:uppercase;
 }
-.kc-gear .skull{color:#e8776f}
-@media(max-width:640px){.kc-gear{grid-template-columns:1fr}}
+.kc-tape-key span{display:flex;align-items:center;gap:6px}
+.kc-tape-key span::before{content:"";width:7px;height:7px;border-radius:50%;flex:none}
+.kc-tape-key .k{color:var(--gold-2)}
+.kc-tape-key .k::before{background:var(--gold-2)}
+.kc-tape-key .v{color:#c96a63}
+.kc-tape-key .v::before{background:#c96a63}
+.kc-tape-cols{display:flex;gap:3px;overflow-x:auto}
+.kc-tick{
+  flex:1 1 0;min-width:30px;display:flex;flex-direction:column;align-items:center;gap:2px;
+  padding:4px 2px 3px;background:#171611;border:1px solid var(--line);border-radius:3px;
+  cursor:pointer;
+}
+.kc-tick:hover{border-color:var(--gold-3)}
+.kc-tick.now{border-color:var(--gold-2);background:rgba(201,143,20,.12)}
+.kc-tick em{
+  font-family:var(--font-mono);font-size:9px;font-style:normal;color:var(--muted);
+  font-variant-numeric:tabular-nums;
+}
+.kc-cell{display:flex;align-items:center;justify-content:center;height:23px;width:24px}
+.kc-cell.none::after{content:"";width:3px;height:3px;border-radius:50%;background:var(--line-2)}
+/* The splat as the client draws it: the cache's 24x23 sprite with the number
+   on its middle. A zero is the blue splat with a 0 on it, not the word block. */
+.kc-splat-s{
+  width:24px;height:23px;background-repeat:no-repeat;background-size:24px 23px;
+  image-rendering:pixelated;
+  font-family:var(--font-mono);font-size:11px;font-weight:700;line-height:23px;
+  text-align:center;color:#fff;
+  text-shadow:1px 1px 0 #000,-1px 0 0 #000,0 -1px 0 #000;
+}
+
+/* The killing weapon, and the scalars a spectator reads a fight by. */
+.kc-weapon{
+  display:flex;align-items:center;gap:14px;padding:14px;border-bottom:1px solid var(--line);
+}
+.kc-weapon > div{display:flex;flex-direction:column;gap:2px;min-width:0}
+.kc-weapon span{
+  font-family:var(--font-mono);font-size:9.5px;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--muted);
+}
+.kc-weapon b{font-size:14px;color:var(--bone);font-weight:600}
+.kc-tiles{display:grid;grid-template-columns:repeat(2,1fr);gap:1px;background:var(--line)}
+@media(min-width:1000px){.kc-tiles{grid-template-columns:repeat(4,1fr)}}
+.kc-tile{background:var(--panel);padding:11px 12px 12px;display:flex;flex-direction:column;gap:2px}
+.kc-tile span{
+  font-family:var(--font-mono);font-size:9px;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--muted);
+}
+.kc-tile b{
+  font-family:var(--font-mono);font-size:17px;font-weight:600;color:var(--gold);
+  font-variant-numeric:tabular-nums;line-height:1.1;
+}
+.kc-tile em{
+  font-family:var(--font-mono);font-size:9px;font-style:normal;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--ash);
+}
+@media(max-width:420px){.kc-sides{grid-template-columns:1fr}}
 .kc-controls{display:flex;align-items:center;gap:12px;padding:12px 16px;border-top:1px solid var(--line)}
 #kc-play{
   width:36px;height:36px;flex:none;border-radius:4px;cursor:pointer;
@@ -1073,12 +1251,6 @@ tr.r1{background:rgba(201,143,20,.08)}
 #kc-status{
   font-family:var(--font-mono);font-size:10.5px;letter-spacing:.1em;
   text-transform:uppercase;color:var(--muted);white-space:nowrap;
-}
-.kc-frame-stats{
-  display:flex;flex-wrap:wrap;gap:6px 16px;padding:12px 16px 16px;
-  border-top:1px solid var(--line);
-  font-family:var(--font-mono);font-size:10.5px;letter-spacing:.12em;
-  text-transform:uppercase;color:var(--ash);
 }
 .kc-legend{
   display:flex;gap:18px;flex-wrap:wrap;padding:0 16px 14px;

@@ -30,7 +30,7 @@ SKULL_RISK = '/assets/img/skull-risk.png'
 
 NAV_LINKS = [
     ("/", "HOME", "home"),
-    ("/play/", "PLAY", "play"),
+    # TEMP: PLAY disabled/unused
     ("/hiscore/", "HISCORES", "hiscore"),
     ("/battles/", "BATTLES", "battles"),
 ]
@@ -38,7 +38,8 @@ NAV_LINKS = [
 MORE_LINKS = [
     ("/battles/", "Battle Finder"),
     ("/killcams/", "Top Killcams"),
-    ("/vote/", "Vote for a Reward"),
+    ("/killfeed/", "Kill Feed"),
+    # TEMP: Vote disabled/unused
     ("/itemlist/", "Item List"),
     ("/droptable/", "Drop Table"),
     ("sep",),
@@ -78,11 +79,11 @@ def nav_html(active: str) -> str:
         <nav class="nav" aria-label="Primary">
           {links}
           <div class="has-dropdown">
-            <a class="nav-link" href="/vote/">MORE <i class="bi bi-chevron-down" style="font-size:10px"></i></a>
+            <a class="nav-link" href="/battles/">MORE <i class="bi bi-chevron-down" style="font-size:10px"></i></a>
             <div class="dropdown">{more}</div>
           </div>
           <div class="nav-cta">
-            <a class="btn btn-gold btn-sm" href="/play/">ENTER LEAGUE</a>
+            <a class="btn btn-gold btn-sm" href="/download/">ENTER LEAGUE</a>
           </div>
         </nav>
         <button class="burger" id="burger" aria-label="Menu"><i class="bi bi-list"></i></button>
@@ -90,14 +91,14 @@ def nav_html(active: str) -> str:
     </header>
     <div class="mobile-nav" id="mobile-nav">
       {mobile}
-      <a class="btn btn-gold btn-block" href="/play/">ENTER LEAGUE</a>
+      <a class="btn btn-gold btn-block" href="/download/">ENTER LEAGUE</a>
     </div>"""
 
 
 def footer_html(include_cart: bool = False) -> str:
     cols = {
         "Compete": [
-            ("/play/", "Enter the League"),
+            ("/download/", "Enter the League"),
             ("/hiscore/", "Hiscores"),
             ("/battles/", "Battle Finder"),
         ],
@@ -212,8 +213,15 @@ def scripts(extra_js: str, module_js: str) -> str:
     return "\n  ".join(out)
 
 
+# TEMP: pages disabled/unused, not built. Re-enable by removing from this set.
+DISABLED_PAGES = {"play/index.html", "vote/index.html"}
+
+
 def page(path: str, title: str, desc: str, active: str, content: str,
           extra_js: str = "", module_js: str = "") -> None:
+    if path in DISABLED_PAGES:
+        print("skipped (disabled)", path)
+        return
     full = f"""<!doctype html>
 <html lang="en">
 <head>
@@ -328,15 +336,6 @@ def build_home():
         </div>"""
         for key, name, elo, _ in TIERS
     )
-    cards = "".join(
-        f"""<article class="elo-card rv">
-          <span class="elo-n">{n}</span>
-          <h3>{title}</h3>
-          <p>{body}</p>
-        </article>"""
-        for n, title, body in ELO_CARDS
-    )
-
     content = f"""
     <div class="hero hero-competitive">
       <div class="hero-bg"></div>
@@ -354,11 +353,9 @@ def build_home():
             <span><b class="js-cd-s">00</b><small>Sec</small></span>
           </div>
         </div>
-        <div class="hero-kicker"><span class="live-mark"></span> Old School combat · Skill-based Elo</div>
         <h1 class="hero-title">Ranked <span class="line-gold">PvP ladder.</span></h1>
-        <p class="hero-sub">Ten placement fights set your rating. Five divisions, Bronze to Dragon.</p>
         <div class="hero-actions">
-          <a class="btn btn-gold btn-lg" href="/play/"><i class="bi bi-crosshair"></i> ENTER THE LEAGUE</a>
+          <a class="btn btn-gold btn-lg" href="/download/"><i class="bi bi-crosshair"></i> ENTER THE LEAGUE</a>
           <a class="hero-text-link" href="/hiscore/">VIEW THE LADDER <i class="bi bi-arrow-right"></i></a>
         </div>
         <div class="hero-ranks" aria-label="Ranked divisions from Bronze to Dragon">
@@ -368,24 +365,21 @@ def build_home():
       </div>
     </div>
 
-    <section class="section ranked-system" id="ranked">
-      <div class="container">
-        {section_head("Rating system", "How Elo is calculated")}
-        <div class="elo-grid">{cards}</div>
-        <div class="elo-formula rv">
-          <span>NEW ELO = ELO + <b>K</b> &times; (RESULT &minus; EXPECTED)</span>
-          <span>K <b>32</b></span>
-          <span>PLACEMENTS <b>64</b></span>
-          <span>RESET <b>SOFT</b></span>
+    <div class="feed-ticker" aria-label="Recent kills">
+      <div class="feed-ticker-label"><i class="bi bi-broadcast"></i> Kill feed</div>
+      <div class="feed-ticker-viewport">
+        <div class="feed-ticker-track" id="feed-ticker-track">
+          <span class="feed-ticker-item">Live kills stream in once the league opens.</span>
         </div>
       </div>
-    </section>
+    </div>
+
     """
 
     page("index.html", "RuneScape PK League — The #1 PvP League",
          "RSPKL — competitive Old School PvP. Five divisions, weekly hybrid tournaments, "
          "bounty tiers and a 250M PKP prize pool. Play instantly in your browser.",
-         "home", content)
+         "home", content, extra_js="assets/js/killfeed.js")
 
 
 # ============================================================ PLAY
@@ -1074,6 +1068,42 @@ def build_killcams():
          module_js="assets/js/killcam-3d.js")
 
 
+# ============================================================ KILL FEED
+def build_killfeed():
+    """The kill feed: a scrollable newsfeed of recent kills.
+
+    This is the killcams table again, read in kill order instead of vote
+    order (`GET /api/killfeed`, `server/web/src/killcams.js#listFeed`) - no
+    parallel capture pipeline, no second table. A post links back into
+    `/killcams/` for a replay only when the kill sampled one; not every kill
+    does, and the page says so rather than linking to nothing.
+    """
+    content = f"""
+    {page_hero("Live", "Kill <em>Feed</em>",
+               "Every wilderness kill the league records, newest first — killer, victim, weapon, bracket, and a replay where one was sampled.")}
+    <section class="section">
+      <div class="container">
+        <div class="panel rv">
+          <div class="panel-head">
+            <h3>RECENT KILLS</h3>
+          </div>
+          <div class="panel-body tight">
+            <div class="kc-list" id="kf-list"></div>
+            <div class="kf-more"><button class="btn btn-outline btn-sm" id="kf-more">LOAD MORE</button></div>
+          </div>
+        </div>
+        <div class="note-strip" id="kf-note">
+          <i class="bi bi-broadcast"></i>
+          <span>Sample feed. Live kills sync from the world at Season 1.</span>
+        </div>
+      </div>
+    </section>"""
+    page("killfeed/index.html", "Kill Feed — Recent Kills | RuneScape PK League",
+         "The RSPKL kill feed — every wilderness kill, newest first, with weapon, "
+         "bracket, location and a replay link where a killcam was recorded.",
+         "killfeed", content, extra_js="assets/js/killfeed.js")
+
+
 # ============================================================ VOTE
 def build_vote():
     sites = ""
@@ -1458,7 +1488,7 @@ def build_404():
         <p class="hero-sub">This page does not exist.</p>
         <div class="hero-actions">
           <a class="btn btn-gold btn-lg" href="/"><i class="bi bi-house"></i> BACK TO HOME</a>
-          <a class="btn btn-outline btn-lg" href="/play/"><i class="bi bi-play-fill"></i> PLAY NOW</a>
+          <a class="btn btn-outline btn-lg" href="/download/"><i class="bi bi-play-fill"></i> PLAY NOW</a>
         </div>
       </div>
     </div>"""
@@ -1468,8 +1498,8 @@ def build_404():
 
 
 def build_extras():
-    pages = ["", "play/", "download/", "register/", "donate/", "hiscore/", "battles/",
-             "vote/", "killcams/", "itemlist/", "droptable/", "staff/", "support/",
+    pages = ["", "download/", "register/", "donate/", "hiscore/", "battles/",
+             "killcams/", "killfeed/", "itemlist/", "droptable/", "staff/", "support/",
              "rules/", "provablyfair/"]
     sitemap = '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
     for p in pages:
@@ -1491,6 +1521,7 @@ if __name__ == "__main__":
     build_hiscore()
     build_battles()
     build_killcams()
+    build_killfeed()
     build_vote()
     build_itemlist()
     build_droptable()

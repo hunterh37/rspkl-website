@@ -3,10 +3,10 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Downloads — RSPKL Client | RuneScape PK League</title>
-  <meta name="description" content="Download the RSPKL client for Windows, macOS, Linux or Java — or play instantly in your browser. All clients update automatically.">
-  <meta property="og:title" content="Downloads — RSPKL Client | RuneScape PK League">
-  <meta property="og:description" content="Download the RSPKL client for Windows, macOS, Linux or Java — or play instantly in your browser. All clients update automatically.">
+  <title>Kill Feed — Recent Kills | RuneScape PK League</title>
+  <meta name="description" content="The RSPKL kill feed — every wilderness kill, newest first, with weapon, bracket, location and a replay link where a killcam was recorded.">
+  <meta property="og:title" content="Kill Feed — Recent Kills | RuneScape PK League">
+  <meta property="og:description" content="The RSPKL kill feed — every wilderness kill, newest first, with weapon, bracket, location and a replay link where a killcam was recorded.">
   <meta property="og:type" content="website">
   <meta property="og:image" content="https://rspkl.com/assets/img/app-icon.png">
   <meta name="theme-color" content="#c98f14">
@@ -50,64 +50,24 @@
   
     <div class="page-hero">
       <img class="wm" src="/assets/img/skull-gold.png" alt="">
-      <div class="kicker">Client downloads</div>
-      <h1>Native <em>Clients</em></h1>
-      <p class="sub">Windows, macOS, Linux and Java builds. All update automatically.</p>
+      <div class="kicker">Live</div>
+      <h1>Kill <em>Feed</em></h1>
+      <p class="sub">Every wilderness kill the league records, newest first — killer, victim, weapon, bracket, and a replay where one was sampled.</p>
     </div>
     <section class="section">
       <div class="container">
-        <div class="section-head">
-      <div class="kicker">Browser</div>
-      <h2>Instant Play</h2>
-      <div class="diamond"><i></i></div>
-    </div>
-        <div class="grid-2">
-          <div class="panel choice-card rv">
-            <span class="glyph"><i class="bi bi-window-desktop"></i></span>
-            <h3>Web Client</h3>
-            <p>Desktop browser. No download or registration.</p>
-            <a class="btn btn-gold" href="/play/">PLAY ON BROWSER</a>
+        <div class="panel rv">
+          <div class="panel-head">
+            <h3>RECENT KILLS</h3>
           </div>
-          <div class="panel choice-card rv">
-            <span class="glyph"><i class="bi bi-phone"></i></span>
-            <h3>Mobile Client</h3>
-            <p>Phone browser. Same account and ladder.</p>
-            <a class="btn btn-outline" href="/play/#mobile">PLAY ON MOBILE</a>
+          <div class="panel-body tight">
+            <div class="kc-list" id="kf-list"></div>
+            <div class="kf-more"><button class="btn btn-outline btn-sm" id="kf-more">LOAD MORE</button></div>
           </div>
         </div>
-      </div>
-    </section>
-    <section class="section">
-      <div class="container">
-        <div class="section-head">
-      <div class="kicker">Native clients</div>
-      <h2>Download the Client</h2>
-      <div class="diamond"><i></i></div>
-    </div>
-        <div class="os-grid"><div class="os-card rv">
-          <span class="os-ic"><i class="bi bi-windows"></i></span>
-          <h3>Windows</h3>
-          <ul><li>Automatic updates</li><li>Windows 10 &amp; 11</li><li>RSPKL64.exe — 38MB</li><li>Install tutorial</li></ul>
-          <a class="btn btn-gold btn-block js-soon" data-soon="The Windows installer" href="#">DOWNLOAD (64-BIT)</a>
-        </div><div class="os-card rv">
-          <span class="os-ic"><i class="bi bi-apple"></i></span>
-          <h3>Mac OS</h3>
-          <ul><li>Automatic updates</li><li>macOS 12 – 15</li><li>RSPKL.dmg — 115MB</li><li>Install tutorial</li></ul>
-          <a class="btn btn-outline btn-block js-soon" data-soon="The Mac OS installer" href="#">DOWNLOAD</a>
-        </div><div class="os-card rv">
-          <span class="os-ic"><i class="bi bi-linux"></i></span>
-          <h3>Linux</h3>
-          <ul><li>Automatic updates</li><li>Debian, Ubuntu &amp; more</li><li>Unzip &amp; launch RSPKL</li><li>RSPKL.jar — 80KB</li></ul>
-          <a class="btn btn-outline btn-block js-soon" data-soon="The Linux installer" href="#">DOWNLOAD</a>
-        </div><div class="os-card rv">
-          <span class="os-ic"><i class="bi bi-filetype-java"></i></span>
-          <h3>Java JAR</h3>
-          <ul><li>Automatic updates</li><li>All operating systems</li><li>Requires Java 11+</li><li>RSPKL.jar — 80KB</li></ul>
-          <a class="btn btn-outline btn-block js-soon" data-soon="The Java JAR installer" href="#">DOWNLOAD</a>
-        </div></div>
-        <div class="note-strip">
-          <i class="bi bi-tools"></i>
-          <span>Debug tool, uninstaller and no-admin installer available. Downloads unlock with Season 1.</span>
+        <div class="note-strip" id="kf-note">
+          <i class="bi bi-broadcast"></i>
+          <span>Sample feed. Live kills sync from the world at Season 1.</span>
         </div>
       </div>
     </section>
@@ -132,6 +92,6 @@
     
     <div class="toast" id="toast" role="status"></div>
     <script src="/assets/js/main.js"></script>
-  
+  <script src="/assets/js/killfeed.js"></script>
 </body>
 </html>

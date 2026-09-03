@@ -1,14 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url><loc>https://rspkl.com/</loc></url>
-  <url><loc>https://rspkl.com/play/</loc></url>
   <url><loc>https://rspkl.com/download/</loc></url>
   <url><loc>https://rspkl.com/register/</loc></url>
   <url><loc>https://rspkl.com/donate/</loc></url>
   <url><loc>https://rspkl.com/hiscore/</loc></url>
   <url><loc>https://rspkl.com/battles/</loc></url>
-  <url><loc>https://rspkl.com/vote/</loc></url>
   <url><loc>https://rspkl.com/killcams/</loc></url>
+  <url><loc>https://rspkl.com/killfeed/</loc></url>
   <url><loc>https://rspkl.com/itemlist/</loc></url>
   <url><loc>https://rspkl.com/droptable/</loc></url>
   <url><loc>https://rspkl.com/staff/</loc></url>

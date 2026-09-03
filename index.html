@@ -30,21 +30,21 @@
           </span>
         </a>
         <nav class="nav" aria-label="Primary">
-          <a class="nav-link active" href="/">HOME</a><a class="nav-link" href="/play/">PLAY</a><a class="nav-link" href="/hiscore/">HISCORES</a><a class="nav-link" href="/battles/">BATTLES</a>
+          <a class="nav-link active" href="/">HOME</a><a class="nav-link" href="/hiscore/">HISCORES</a><a class="nav-link" href="/battles/">BATTLES</a>
           <div class="has-dropdown">
-            <a class="nav-link" href="/vote/">MORE <i class="bi bi-chevron-down" style="font-size:10px"></i></a>
-            <div class="dropdown"><a href="/battles/">Battle Finder</a><a href="/killcams/">Top Killcams</a><a href="/vote/">Vote for a Reward</a><a href="/itemlist/">Item List</a><a href="/droptable/">Drop Table</a><div class="sep"></div><a href="/staff/">Staff List</a><a href="/support/">Support</a><a href="/rules/">Rules</a><a href="/provablyfair/">Provably Fair</a></div>
+            <a class="nav-link" href="/battles/">MORE <i class="bi bi-chevron-down" style="font-size:10px"></i></a>
+            <div class="dropdown"><a href="/battles/">Battle Finder</a><a href="/killcams/">Top Killcams</a><a href="/killfeed/">Kill Feed</a><a href="/itemlist/">Item List</a><a href="/droptable/">Drop Table</a><div class="sep"></div><a href="/staff/">Staff List</a><a href="/support/">Support</a><a href="/rules/">Rules</a><a href="/provablyfair/">Provably Fair</a></div>
           </div>
           <div class="nav-cta">
-            <a class="btn btn-gold btn-sm" href="/play/">ENTER LEAGUE</a>
+            <a class="btn btn-gold btn-sm" href="/download/">ENTER LEAGUE</a>
           </div>
         </nav>
         <button class="burger" id="burger" aria-label="Menu"><i class="bi bi-list"></i></button>
       </div>
     </header>
     <div class="mobile-nav" id="mobile-nav">
-      <a href="/">HOME</a><a href="/play/">PLAY</a><a href="/hiscore/">HISCORES</a><a href="/battles/">BATTLES</a><a href="/battles/">Battle Finder</a><a href="/killcams/">Top Killcams</a><a href="/vote/">Vote for a Reward</a><a href="/itemlist/">Item List</a><a href="/droptable/">Drop Table</a><a href="/staff/">Staff List</a><a href="/support/">Support</a><a href="/rules/">Rules</a><a href="/provablyfair/">Provably Fair</a>
-      <a class="btn btn-gold btn-block" href="/play/">ENTER LEAGUE</a>
+      <a href="/">HOME</a><a href="/hiscore/">HISCORES</a><a href="/battles/">BATTLES</a><a href="/battles/">Battle Finder</a><a href="/killcams/">Top Killcams</a><a href="/killfeed/">Kill Feed</a><a href="/itemlist/">Item List</a><a href="/droptable/">Drop Table</a><a href="/staff/">Staff List</a><a href="/support/">Support</a><a href="/rules/">Rules</a><a href="/provablyfair/">Provably Fair</a>
+      <a class="btn btn-gold btn-block" href="/download/">ENTER LEAGUE</a>
     </div>
   <main>
   
@@ -64,11 +64,9 @@
             <span><b class="js-cd-s">00</b><small>Sec</small></span>
           </div>
         </div>
-        <div class="hero-kicker"><span class="live-mark"></span> Old School combat · Skill-based Elo</div>
         <h1 class="hero-title">Ranked <span class="line-gold">PvP ladder.</span></h1>
-        <p class="hero-sub">Ten placement fights set your rating. Five divisions, Bronze to Dragon.</p>
         <div class="hero-actions">
-          <a class="btn btn-gold btn-lg" href="/play/"><i class="bi bi-crosshair"></i> ENTER THE LEAGUE</a>
+          <a class="btn btn-gold btn-lg" href="/download/"><i class="bi bi-crosshair"></i> ENTER THE LEAGUE</a>
           <a class="hero-text-link" href="/hiscore/">VIEW THE LADDER <i class="bi bi-arrow-right"></i></a>
         </div>
         <div class="hero-ranks" aria-label="Ranked divisions from Bronze to Dragon">
@@ -98,35 +96,15 @@
       </div>
     </div>
 
-    <section class="section ranked-system" id="ranked">
-      <div class="container">
-        <div class="section-head">
-      <div class="kicker">Rating system</div>
-      <h2>How Elo is calculated</h2>
-      <div class="diamond"><i></i></div>
-    </div>
-        <div class="elo-grid"><article class="elo-card rv">
-          <span class="elo-n">01</span>
-          <h3>Ten placement fights</h3>
-          <p>Ten placement fights seed the rating. A 10-0 run places above Bronze.</p>
-        </article><article class="elo-card rv">
-          <span class="elo-n">02</span>
-          <h3>Every fight is rated</h3>
-          <p>Rated duels and Wilderness kills both move Elo. Higher-rated wins pay more.</p>
-        </article><article class="elo-card rv">
-          <span class="elo-n">03</span>
-          <h3>Promotion &amp; grace</h3>
-          <p>Crossing a tier ceiling promotes immediately. Demotion allows three recovery fights.</p>
-        </article></div>
-        <div class="elo-formula rv">
-          <span>NEW ELO = ELO + <b>K</b> &times; (RESULT &minus; EXPECTED)</span>
-          <span>K <b>32</b></span>
-          <span>PLACEMENTS <b>64</b></span>
-          <span>RESET <b>SOFT</b></span>
+    <div class="feed-ticker" aria-label="Recent kills">
+      <div class="feed-ticker-label"><i class="bi bi-broadcast"></i> Kill feed</div>
+      <div class="feed-ticker-viewport">
+        <div class="feed-ticker-track" id="feed-ticker-track">
+          <span class="feed-ticker-item">Live kills stream in once the league opens.</span>
         </div>
       </div>
-    </section>
-    
+    </div>
+
   </main>
   
     <footer class="site-footer">
@@ -134,7 +112,7 @@
         <div class="footer-cta">
           <div class="t">RSPKL <span>· Competitive Old School PvP</span></div>
         </div>
-        <div class="footer-grid"><div><div class="footer-head">Compete</div><a class="footer-link" href="/play/">Enter the League<i class="bi bi-chevron-right"></i></a><a class="footer-link" href="/hiscore/">Hiscores<i class="bi bi-chevron-right"></i></a><a class="footer-link" href="/battles/">Battle Finder<i class="bi bi-chevron-right"></i></a></div><div><div class="footer-head">Resources</div><a class="footer-link" href="/itemlist/">Item List<i class="bi bi-chevron-right"></i></a><a class="footer-link" href="/droptable/">Drop Table<i class="bi bi-chevron-right"></i></a><a class="footer-link" href="/rules/">Rules<i class="bi bi-chevron-right"></i></a><a class="footer-link" href="/provablyfair/">Provably Fair<i class="bi bi-chevron-right"></i></a></div><div><div class="footer-head">Support</div><a class="footer-link" href="/support/">Contact Us<i class="bi bi-chevron-right"></i></a><a class="footer-link" href="mailto:support@rspkl.com">Email Support<i class="bi bi-chevron-right"></i></a><a class="footer-link" href="/staff/">Staff List<i class="bi bi-chevron-right"></i></a></div></div>
+        <div class="footer-grid"><div><div class="footer-head">Compete</div><a class="footer-link" href="/download/">Enter the League<i class="bi bi-chevron-right"></i></a><a class="footer-link" href="/hiscore/">Hiscores<i class="bi bi-chevron-right"></i></a><a class="footer-link" href="/battles/">Battle Finder<i class="bi bi-chevron-right"></i></a></div><div><div class="footer-head">Resources</div><a class="footer-link" href="/itemlist/">Item List<i class="bi bi-chevron-right"></i></a><a class="footer-link" href="/droptable/">Drop Table<i class="bi bi-chevron-right"></i></a><a class="footer-link" href="/rules/">Rules<i class="bi bi-chevron-right"></i></a><a class="footer-link" href="/provablyfair/">Provably Fair<i class="bi bi-chevron-right"></i></a></div><div><div class="footer-head">Support</div><a class="footer-link" href="/support/">Contact Us<i class="bi bi-chevron-right"></i></a><a class="footer-link" href="mailto:support@rspkl.com">Email Support<i class="bi bi-chevron-right"></i></a><a class="footer-link" href="/staff/">Staff List<i class="bi bi-chevron-right"></i></a></div></div>
         <div class="footer-bottom">
           <div>&copy; <span class="js-year">2026</span> RUNESCAPE PK LEAGUE — All Rights Reserved.</div>
           <div class="legal">
@@ -148,6 +126,6 @@
     
     <div class="toast" id="toast" role="status"></div>
     <script src="/assets/js/main.js"></script>
-  
+  <script src="/assets/js/killfeed.js"></script>
 </body>
 </html>

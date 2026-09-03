@@ -991,6 +991,63 @@ tr.r1{background:rgba(201,143,20,.08)}
   .kc-actions{grid-column:2;justify-content:flex-end}
 }
 
+/* ---------- kill feed ---------- */
+/* The homepage banner: one line per kill, scrolling right to left. The track
+   is rendered twice back to back and the keyframe moves exactly half its own
+   width, so the loop has no seam regardless of how many posts are live. */
+.feed-ticker{
+  background:var(--panel);border-top:1px solid var(--line);border-bottom:1px solid var(--line);
+  overflow:hidden;white-space:nowrap;position:relative;
+}
+.feed-ticker-label{
+  position:absolute;left:0;top:0;bottom:0;display:flex;align-items:center;gap:6px;
+  padding:0 14px;background:var(--panel);border-right:1px solid var(--line);z-index:1;
+  font-family:var(--font-mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--gold-2);
+}
+.feed-ticker-viewport{padding-left:132px;overflow:hidden}
+.feed-ticker-track{
+  display:inline-flex;align-items:center;gap:28px;padding:11px 0;
+  animation:feed-ticker-scroll 60s linear infinite;
+}
+.feed-ticker:hover .feed-ticker-track{animation-play-state:paused}
+.feed-ticker-item{font-size:13px;color:var(--parch)}
+.feed-ticker-item b{color:var(--bone)}
+.feed-ticker-item .kf-b{color:var(--muted);font-size:11px}
+.feed-ticker-item .kf-weapon,.feed-ticker-item .kf-loc{color:var(--muted);font-size:12px}
+.feed-ticker-sep{color:var(--gold-3)}
+@keyframes feed-ticker-scroll{
+  from{transform:translateX(0)}
+  to{transform:translateX(-50%)}
+}
+@media(prefers-reduced-motion:reduce){
+  .feed-ticker-track{animation:none}
+}
+@media(max-width:640px){
+  .feed-ticker-label{display:none}
+  .feed-ticker-viewport{padding-left:0}
+}
+
+/* The /killfeed/ newsfeed: kf-cards reuse kc-card's grid and simply swap in a
+   timestamp for a rank and a replay link for a vote. */
+.kf-card{grid-template-columns:64px 1fr auto}
+.kf-time{
+  font-family:var(--font-mono);font-size:11px;color:var(--muted);text-align:center;
+  letter-spacing:.04em;
+}
+.kf-line{font-size:14.5px;color:var(--parch);line-height:1.5}
+.kf-line b{color:var(--bone);font-weight:700}
+.kf-line .kf-b{color:var(--muted);font-size:11.5px;font-family:var(--font-mono)}
+.kf-line i{color:var(--gold-3);font-size:11px;margin:0 4px}
+.kf-noreplay{
+  font-family:var(--font-mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--muted);
+}
+.kf-more{display:flex;justify-content:center;margin-top:14px}
+@media(max-width:640px){
+  .kf-card{grid-template-columns:1fr}
+}
+
 /* The replay viewer. Dark to the edges on purpose: the fight is drawn on an
    empty floor because a cam records tiles and no scenery, and dressing the
    frame would imply a place the recording does not hold. */

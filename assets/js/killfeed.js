@@ -22,6 +22,14 @@
     });
   }
 
+  /* A name in the feed is a way into that player's profile
+     (website/assets/js/player.js) - the ticker and the newsfeed share this, so
+     a name reads and links the same in both. */
+  function playerLink(name, killer) {
+    var inner = killer ? '<b>' + escapeHtml(name) + '</b>' : '<span>' + escapeHtml(name) + '</span>';
+    return '<a class="u-link" href="/player/?name=' + encodeURIComponent(name) + '">' + inner + '</a>';
+  }
+
   function ago(iso) {
     var then = new Date(iso).getTime();
     if (!then) { return ''; }
@@ -47,9 +55,9 @@
     var vb = p.victimBracket || bracket(p.victimCombat);
     var wild = p.wildernessLevel ? 'Wild ' + p.wildernessLevel : 'Wilderness';
     var weapon = escapeHtml(p.weaponName || 'Unarmed');
-    return '<b>' + escapeHtml(p.killer) + '</b> <span class="kf-b">(' + kb + ')</span>' +
+    return playerLink(p.killer, true) + ' <span class="kf-b">(' + kb + ')</span>' +
       ' <i class="bi bi-caret-right-fill"></i> ' +
-      '<span>' + escapeHtml(p.victim) + '</span> <span class="kf-b">(' + vb + ')</span>' +
+      playerLink(p.victim, false) + ' <span class="kf-b">(' + vb + ')</span>' +
       ' <span class="kf-weapon">with ' + weapon + '</span>' +
       ' <span class="kf-loc">&middot; ' + wild + '</span>';
   }

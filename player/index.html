@@ -3,10 +3,10 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>RuneScape PK League — The #1 PvP League</title>
-  <meta name="description" content="RSPKL — competitive Old School PvP. Five divisions, weekly hybrid tournaments, bounty tiers and a 250M PKP prize pool. Play instantly in your browser.">
-  <meta property="og:title" content="RuneScape PK League — The #1 PvP League">
-  <meta property="og:description" content="RSPKL — competitive Old School PvP. Five divisions, weekly hybrid tournaments, bounty tiers and a 250M PKP prize pool. Play instantly in your browser.">
+  <title>Player Profile — RSPKL | RuneScape PK League</title>
+  <meta name="description" content="An RSPKL player profile — kills, deaths, K/D, streaks, ladder positions, skills and every killcam the player appears in.">
+  <meta property="og:title" content="Player Profile — RSPKL | RuneScape PK League">
+  <meta property="og:description" content="An RSPKL player profile — kills, deaths, K/D, streaks, ladder positions, skills and every killcam the player appears in.">
   <meta property="og:type" content="website">
   <meta property="og:image" content="https://rspkl.com/assets/img/app-icon.png">
   <meta name="theme-color" content="#c98f14">
@@ -30,7 +30,7 @@
           </span>
         </a>
         <nav class="nav" aria-label="Primary">
-          <a class="nav-link active" href="/">HOME</a><a class="nav-link" href="/hiscore/">HISCORES</a><a class="nav-link" href="/battles/">BATTLES</a>
+          <a class="nav-link" href="/">HOME</a><a class="nav-link active" href="/hiscore/">HISCORES</a><a class="nav-link" href="/battles/">BATTLES</a>
           <div class="has-dropdown">
             <a class="nav-link" href="/battles/">MORE <i class="bi bi-chevron-down" style="font-size:10px"></i></a>
             <div class="dropdown"><a href="/battles/">Battle Finder</a><a href="/killcams/">Top Killcams</a><a href="/killfeed/">Kill Feed</a><a href="/itemlist/">Item List</a><a href="/droptable/">Drop Table</a><div class="sep"></div><a href="/staff/">Staff List</a><a href="/support/">Support</a><a href="/rules/">Rules</a><a href="/provablyfair/">Provably Fair</a></div>
@@ -48,64 +48,88 @@
     </div>
   <main>
   
-    <div class="hero hero-competitive">
-      <div class="hero-bg"></div>
-      <img class="hero-wm" src="/assets/img/skull-gold.png" alt="">
-      <div class="hero-inner">
-        <div class="season-banner" aria-label="Countdown to RSPKL Season 1">
-          <div class="season-banner-title">
-            <span class="season-number">S1</span>
-            <span><b>RuneScape PvP Ranked Ladder</b><small>Season 1 opens September 15 · 18:00 UTC</small></span>
+    <div class="page-hero pp-hero">
+      <img class="wm" src="/assets/img/skull-gold.png" alt="">
+      <div class="kicker" id="pp-kicker">Profile</div>
+      <h1 id="pp-name">Player</h1>
+      <p class="sub" id="pp-sub">Loading the league record&hellip;</p>
+      <div class="pp-chips" id="pp-chips"></div>
+    </div>
+    <section class="section">
+      <div class="container">
+        <div class="with-side">
+          <div class="pp-main">
+            <div class="panel rv">
+              <div class="panel-head">
+                <h3>THE RECORD</h3>
+                <div class="seg" id="pp-mode">
+                  <button class="on" data-mode="normal">Normal</button>
+                  <button data-mode="hc">Hardcore PvP</button>
+                </div>
+              </div>
+              <div class="panel-body tight">
+                <div class="pp-tiles" id="pp-tiles"></div>
+              </div>
+            </div>
+            <div class="panel rv">
+              <div class="panel-head">
+                <h3>FIGHTS</h3>
+                <div class="seg" id="pp-cams">
+                  <button class="on" data-cams="kills">Kills</button>
+                  <button data-cams="deaths">Deaths</button>
+                  <button data-cams="top">Top voted</button>
+                </div>
+              </div>
+              <div class="panel-body tight">
+                <div class="kc-list" id="pp-cam-list"></div>
+              </div>
+            </div>
+            <div class="panel rv">
+              <div class="panel-head"><h3>SKILLS</h3><div class="r" id="pp-total">&mdash;</div></div>
+              <div class="panel-body tight">
+                <div class="pp-skills" id="pp-skills"></div>
+              </div>
+            </div>
           </div>
-          <div class="season-countdown" aria-live="polite">
-            <span><b class="js-cd-d">00</b><small>Days</small></span><i>:</i>
-            <span><b class="js-cd-h">00</b><small>Hrs</small></span><i>:</i>
-            <span><b class="js-cd-m">00</b><small>Min</small></span><i>:</i>
-            <span><b class="js-cd-s">00</b><small>Sec</small></span>
+          <div class="side-col">
+            <div class="panel rv">
+              <div class="panel-head"><h3>Ladder positions</h3></div>
+              <div class="panel-body tight">
+                <div class="pp-ranks" id="pp-ranks"></div>
+              </div>
+            </div>
+            <div class="panel rv">
+              <div class="panel-head"><h3>Another player</h3></div>
+              <div class="panel-body">
+                <form id="pp-search">
+                  <div class="field">
+                    <label for="pp-query">Log-in name</label>
+                    <input class="input" id="pp-query" placeholder="Search players" autocomplete="off">
+                  </div>
+                  <div class="pp-suggest" id="pp-suggest"></div>
+                  <button class="btn btn-gold btn-block" type="submit">OPEN PROFILE</button>
+                </form>
+              </div>
+            </div>
+            <div class="panel rv">
+              <div class="panel-head"><h3>Elsewhere</h3></div>
+              <div class="panel-body hs-cats">
+                <div class="cat-group">
+                  <a href="/hiscore/" id="pp-link-hiscore">Hiscores<i class="bi bi-chevron-right"></i></a>
+                  <a href="/killcams/" id="pp-link-cams">All killcams<i class="bi bi-chevron-right"></i></a>
+                  <a href="/killfeed/" id="pp-link-feed">Kill feed<i class="bi bi-chevron-right"></i></a>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
-        <h1 class="hero-title">Ranked <span class="line-gold">PvP ladder.</span></h1>
-        <div class="hero-actions">
-          <a class="btn btn-gold btn-lg" href="/download/"><i class="bi bi-crosshair"></i> ENTER THE LEAGUE</a>
-          <a class="hero-text-link" href="/hiscore/">VIEW THE LADDER <i class="bi bi-arrow-right"></i></a>
-        </div>
-        <div class="hero-ranks" aria-label="Ranked divisions from Bronze to Dragon">
-          <div class="hero-ranks-head"><span>Ranked divisions</span><span>Elo progression</span></div>
-          <div class="ladder-rail"><div class="tier t-bronze">
-          <span class="crest" aria-hidden="true"><i></i></span>
-          <b class="tier-name">Bronze</b>
-          <span class="tier-elo">0 &ndash; 1199</span>
-        </div><div class="tier t-steel">
-          <span class="crest" aria-hidden="true"><i></i></span>
-          <b class="tier-name">Steel</b>
-          <span class="tier-elo">1200 &ndash; 1499</span>
-        </div><div class="tier t-mith">
-          <span class="crest" aria-hidden="true"><i></i></span>
-          <b class="tier-name">Mithril</b>
-          <span class="tier-elo">1500 &ndash; 1799</span>
-        </div><div class="tier t-rune">
-          <span class="crest" aria-hidden="true"><i></i></span>
-          <b class="tier-name">Rune</b>
-          <span class="tier-elo">1800 &ndash; 2099</span>
-        </div><div class="tier t-drag">
-          <span class="crest" aria-hidden="true"><i></i></span>
-          <b class="tier-name">Dragon</b>
-          <span class="tier-elo">2100+</span>
-        </div></div>
+        <div class="note-strip" id="pp-note" style="display:none">
+          <i class="bi bi-person-badge"></i>
+          <span>Sample profile. Live records sync from the league database at Season 1.</span>
         </div>
       </div>
-    </div>
-
-    <div class="feed-ticker" aria-label="Recent kills">
-      <div class="feed-ticker-label"><i class="bi bi-broadcast"></i> Kill feed</div>
-      <div class="feed-ticker-viewport">
-        <div class="feed-ticker-track" id="feed-ticker-track">
-          <span class="feed-ticker-item">Live kills stream in once the league opens.</span>
-        </div>
-      </div>
-    </div>
-
-    
+    </section>
+    <div id="pp-items" hidden data-items="67c4caa74f7b"></div>
   </main>
   
     <footer class="site-footer">
@@ -127,6 +151,7 @@
     
     <div class="toast" id="toast" role="status"></div>
     <script src="/assets/js/main.js"></script>
-  <script src="/assets/js/killfeed.js"></script>
+  <script src="/assets/js/killcam-icons.js"></script>
+  <script src="/assets/js/player.js"></script>
 </body>
 </html>

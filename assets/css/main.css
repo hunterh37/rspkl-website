@@ -1329,3 +1329,85 @@ tr.r1{background:rgba(201,143,20,.08)}
 .league-table .dim{color:var(--muted)}
 .league-table .live{color:var(--red, #d9534f)}
 .sub.bad{color:var(--red, #d9534f)}
+
+/* ---------- player profile ---------- */
+/* A name is a link wherever it is printed - a ladder row, a killcam card, a
+   feed post - and all of them land on /player/. The link keeps the colour of
+   the text it replaced and earns its underline on hover, so a board still
+   reads as a board rather than as a page of links. */
+.u-link{color:inherit;text-decoration:none}
+.u-link:hover{color:var(--gold-hi);text-decoration:underline}
+.u-link b,.u-link span{color:inherit}
+.league-table td.u .u-link:hover{color:var(--gold-hi)}
+
+.pp-hero{padding-bottom:22px}
+/* The header facts: combat, bracket, tier and what the cams add up to. Chips
+   rather than a table, because they are readings of different things and only
+   some of them exist for any given account. */
+.pp-chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:14px;position:relative}
+.pp-chip{
+  display:inline-flex;align-items:center;gap:7px;padding:6px 11px;
+  background:var(--panel);border:1px solid var(--line);border-radius:4px;
+  font-family:var(--font-mono);font-size:10.5px;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--muted);
+}
+.pp-chip b{color:var(--bone);font-weight:600;font-size:12px;letter-spacing:.06em}
+.pp-chip.tier{border-color:var(--gold-3)}
+.pp-chip.tier span{color:var(--gold)}
+.pp-chip .kc-icon.tier{width:32px;height:32px;flex:none;transform:scale(.56);margin:-9px -8px}
+
+.pp-main{display:flex;flex-direction:column;gap:16px}
+/* Six tiles, in the order the in-game card reads them (spec/PLAYER_CARD.md):
+   the pair a player is judged on first, then the ratio, then the ladder. */
+.pp-tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line)}
+@media(max-width:560px){.pp-tiles{grid-template-columns:repeat(2,1fr)}}
+.pp-tile{background:var(--panel);padding:15px 16px 16px;display:flex;flex-direction:column;gap:3px}
+.pp-tile span{
+  font-family:var(--font-mono);font-size:9.5px;letter-spacing:.24em;
+  text-transform:uppercase;color:var(--muted);
+}
+.pp-tile b{font-family:var(--font-display);font-size:23px;color:var(--gold);font-weight:700;line-height:1.1}
+.pp-tile em{font-style:normal;font-family:var(--font-mono);font-size:10px;letter-spacing:.12em;color:var(--ash)}
+
+/* A fight on a profile is the same row the board draws, with the rank gutter
+   spent on the verdict instead: a profile is read down one player's column, so
+   whether they won is the thing the eye needs first. */
+.pp-cam .pp-verdict{font-size:10px;letter-spacing:.18em}
+.pp-verdict.win{color:var(--gold)}
+.pp-verdict.loss{color:#c96a63}
+.pp-foe{color:var(--muted);font-size:12.5px;margin-left:4px}
+.kc-names .u-link:hover b,.kc-names .u-link:hover span{color:var(--gold-hi)}
+
+.pp-skills{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line)}
+@media(max-width:760px){.pp-skills{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:460px){.pp-skills{grid-template-columns:repeat(2,1fr)}}
+.pp-skill{background:var(--panel);padding:10px 12px;display:flex;flex-direction:column;gap:1px}
+.pp-skill span{
+  font-family:var(--font-mono);font-size:9.5px;letter-spacing:.2em;
+  text-transform:uppercase;color:var(--muted);
+}
+.pp-skill b{font-size:15px;color:var(--bone);font-weight:600}
+.pp-skill em{font-style:normal;font-family:var(--font-mono);font-size:10px;color:var(--ash)}
+
+.pp-ranks{display:flex;flex-direction:column}
+.pp-rank{
+  display:flex;align-items:center;justify-content:space-between;gap:10px;
+  padding:10px 14px;border-bottom:1px solid var(--line);color:var(--parch);
+  text-decoration:none;font-size:13px;
+}
+.pp-rank:last-child{border-bottom:0}
+.pp-rank:hover{background:rgba(201,143,20,.09);color:var(--gold-hi)}
+.pp-rank b{font-family:var(--font-mono);color:var(--gold);font-weight:600;font-variant-numeric:tabular-nums}
+
+/* Name completion under the search box. Empty until it has something to say,
+   so the panel does not reserve a hole for a list that may never come. */
+.pp-suggest{display:flex;flex-direction:column;margin:-4px 0 12px}
+.pp-suggest:empty{display:none}
+.pp-suggest a{
+  display:flex;align-items:center;justify-content:space-between;gap:10px;
+  padding:8px 10px;border:1px solid var(--line);border-bottom:0;
+  color:var(--parch);text-decoration:none;font-size:13px;background:#141310;
+}
+.pp-suggest a:last-child{border-bottom:1px solid var(--line)}
+.pp-suggest a:hover{background:rgba(201,143,20,.1);color:var(--gold-hi)}
+.pp-suggest em{font-style:normal;font-family:var(--font-mono);font-size:10.5px;color:var(--muted)}

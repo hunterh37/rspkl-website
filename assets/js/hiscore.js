@@ -169,7 +169,8 @@
       var vals = board.get(p).map(function (v, ci) {
         return '<td class="' + (ci === board.cols.length - 1 && board.cols[ci] === 'KDR' ? 'kdr' : 'num') + '">' + v + '</td>';
       }).join('');
-      return '<tr class="' + cls + '"><td class="rank">#' + rank + '</td><td class="u">' + p.name + '</td>' + vals + '</tr>';
+      return '<tr class="' + cls + '"><td class="rank">#' + rank + '</td><td class="u">' +
+        playerLink(p.name) + '</td>' + vals + '</tr>';
     }).join('') || '<tr><td colspan="5" class="num" style="padding:30px;text-align:center">No players found.</td></tr>';
 
     var boardTitle = $('#hs-board-title');
@@ -190,6 +191,20 @@
         });
       });
     }
+  }
+
+  function escapeHtml(text) {
+    return String(text == null ? '' : text).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+
+  // Every name on the site opens the same profile page (website/assets/js/player.js).
+  // Built here rather than read off window so the ladder still links with the
+  // profile script absent from this page.
+  function playerLink(name) {
+    return '<a class="u-link" href="/player/?name=' + encodeURIComponent(name) + '">' +
+      escapeHtml(name) + '</a>';
   }
 
   function $(s, c) { return (c || document).querySelector(s); }

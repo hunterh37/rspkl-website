@@ -858,6 +858,110 @@ def build_hiscore():
          extra_js="assets/js/hiscore.js")
 
 
+# ============================================================ PLAYER PROFILE
+def build_player():
+    """The public per-player profile at ``/player/?name=<name>``.
+
+    The web half of the in-game card (``spec/PLAYER_CARD.md``): who this is,
+    what the ladders say about them, and what they have been killing. It is one
+    static page rather than a page per account - the site is committed HTML and
+    a player is a row in a database, so the name travels in the query string
+    and ``assets/js/player.js`` fills the shell from ``GET /api/player/:name``.
+
+    Every name printed anywhere on the site - a hiscore row, a killcam card, a
+    feed post - links here, so the profile is the site's one answer to "who is
+    that", and the killcam rows on it link back out to ``/killcams/?cam=<id>``
+    for the replay rather than embedding a second viewer.
+    """
+    content = f"""
+    <div class="page-hero pp-hero">
+      <img class="wm" src="{SKULL}" alt="">
+      <div class="kicker" id="pp-kicker">Profile</div>
+      <h1 id="pp-name">Player</h1>
+      <p class="sub" id="pp-sub">Loading the league record&hellip;</p>
+      <div class="pp-chips" id="pp-chips"></div>
+    </div>
+    <section class="section">
+      <div class="container">
+        <div class="with-side">
+          <div class="pp-main">
+            <div class="panel rv">
+              <div class="panel-head">
+                <h3>THE RECORD</h3>
+                <div class="seg" id="pp-mode">
+                  <button class="on" data-mode="normal">Normal</button>
+                  <button data-mode="hc">Hardcore PvP</button>
+                </div>
+              </div>
+              <div class="panel-body tight">
+                <div class="pp-tiles" id="pp-tiles"></div>
+              </div>
+            </div>
+            <div class="panel rv">
+              <div class="panel-head">
+                <h3>FIGHTS</h3>
+                <div class="seg" id="pp-cams">
+                  <button class="on" data-cams="kills">Kills</button>
+                  <button data-cams="deaths">Deaths</button>
+                  <button data-cams="top">Top voted</button>
+                </div>
+              </div>
+              <div class="panel-body tight">
+                <div class="kc-list" id="pp-cam-list"></div>
+              </div>
+            </div>
+            <div class="panel rv">
+              <div class="panel-head"><h3>SKILLS</h3><div class="r" id="pp-total">&mdash;</div></div>
+              <div class="panel-body tight">
+                <div class="pp-skills" id="pp-skills"></div>
+              </div>
+            </div>
+          </div>
+          <div class="side-col">
+            <div class="panel rv">
+              <div class="panel-head"><h3>Ladder positions</h3></div>
+              <div class="panel-body tight">
+                <div class="pp-ranks" id="pp-ranks"></div>
+              </div>
+            </div>
+            <div class="panel rv">
+              <div class="panel-head"><h3>Another player</h3></div>
+              <div class="panel-body">
+                <form id="pp-search">
+                  <div class="field">
+                    <label for="pp-query">Log-in name</label>
+                    <input class="input" id="pp-query" placeholder="Search players" autocomplete="off">
+                  </div>
+                  <div class="pp-suggest" id="pp-suggest"></div>
+                  <button class="btn btn-gold btn-block" type="submit">OPEN PROFILE</button>
+                </form>
+              </div>
+            </div>
+            <div class="panel rv">
+              <div class="panel-head"><h3>Elsewhere</h3></div>
+              <div class="panel-body hs-cats">
+                <div class="cat-group">
+                  <a href="/hiscore/" id="pp-link-hiscore">Hiscores<i class="bi bi-chevron-right"></i></a>
+                  <a href="/killcams/" id="pp-link-cams">All killcams<i class="bi bi-chevron-right"></i></a>
+                  <a href="/killfeed/" id="pp-link-feed">Kill feed<i class="bi bi-chevron-right"></i></a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="note-strip" id="pp-note" style="display:none">
+          <i class="bi bi-person-badge"></i>
+          <span>Sample profile. Live records sync from the league database at Season 1.</span>
+        </div>
+      </div>
+    </section>
+    <div id="pp-items" hidden data-items="{item_icon_version()}"></div>"""
+    page("player/index.html", "Player Profile — RSPKL | RuneScape PK League",
+         "An RSPKL player profile — kills, deaths, K/D, streaks, ladder positions, "
+         "skills and every killcam the player appears in.", "hiscore", content,
+         extra_js="assets/js/killcam-icons.js assets/js/player.js")
+
+
 # ============================================================ BATTLES
 def build_battles():
     """The Battle Finder board and the fight-alert signup.
@@ -1499,7 +1603,7 @@ def build_404():
 
 def build_extras():
     pages = ["", "download/", "register/", "donate/", "hiscore/", "battles/",
-             "killcams/", "killfeed/", "itemlist/", "droptable/", "staff/", "support/",
+             "killcams/", "killfeed/", "player/", "itemlist/", "droptable/", "staff/", "support/",
              "rules/", "provablyfair/"]
     sitemap = '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
     for p in pages:
@@ -1519,6 +1623,7 @@ if __name__ == "__main__":
     build_register()
     build_donate()
     build_hiscore()
+    build_player()
     build_battles()
     build_killcams()
     build_killfeed()

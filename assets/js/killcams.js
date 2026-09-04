@@ -343,6 +343,15 @@
     return move > 0 ? 'up' : 'down';
   }
 
+  /* A fighter's name, as a link to their profile (website/assets/js/player.js).
+     The board is where a spectator meets a name they do not recognise, so the
+     name itself is the way in - the killer bold, the victim plain, as the row
+     already read. */
+  function playerLink(name, killer) {
+    var inner = killer ? '<b>' + escapeHtml(name) + '</b>' : '<span>' + escapeHtml(name) + '</span>';
+    return '<a class="u-link" href="/player/?name=' + encodeURIComponent(name) + '">' + inner + '</a>';
+  }
+
   /* An item's real inventory icon, out of the sheets the client exported. An
      empty string where the loader is not on the page, so a row is a row of
      text rather than a hole. */
@@ -354,6 +363,10 @@
 
   var state = { sort: 'top', page: 1, cams: [], live: false };
   var player = null;
+  // A cam id asked for by URL (`/killcams/?cam=<id>`), which is how the kill
+  // feed and a player profile hand a single fight over. Held until the board
+  // has painted, so the page behind the viewer is a board and not a blank.
+  var pendingCam = null;
 
   function ago(iso) {
     var then = new Date(iso).getTime();
@@ -386,8 +399,8 @@
     return '' +
       '<div class="kc-rank">' + (state.sort === 'top' ? '#' + rank : ago(c.killedAt)) + '</div>' +
       '<div class="kc-body">' +
-      '  <div class="kc-names"><b>' + c.killer + '</b> <i class="bi bi-caret-right-fill"></i> ' +
-      '    <span>' + c.victim + '</span></div>' +
+      '  <div class="kc-names">' + playerLink(c.killer, true) +
+      '    <i class="bi bi-caret-right-fill"></i> ' + playerLink(c.victim, false) + '</div>' +
       '  <div class="kc-meta">' +
       '    ' + weapon + ladder +
       '    <span>' + c.killingBlow + ' dmg blow</span>' +
@@ -442,6 +455,7 @@
       renderPager(d.pages || 1);
       var note = $('#kc-note');
       if (note) { note.style.display = 'none'; }
+      openPending();
     }).catch(offline);
   }
 
@@ -455,6 +469,30 @@
     renderPager(1);
     var note = $('#kc-note');
     if (note) { note.style.display = ''; }
+    // No API, so a linked cam cannot be fetched either. Dropped rather than
+    // left pending, so the next board paint does not try again.
+    pendingCam = null;
+  }
+
+  /* Opens the cam a link asked for. It is usually not on the page that was
+     painted - a feed post is months of board pages deep - so a cam that the
+     board does not hold is fetched on its own and pushed onto the board's list,
+     which is what the viewer reads its card from. */
+  function openPending() {
+    if (!pendingCam) { return; }
+    var id = pendingCam;
+    pendingCam = null;
+    if (state.cams.some(function (c) { return c.id === id; })) { openViewer(id); return; }
+    if (typeof window.rspklApi !== 'function') { return; }
+    window.rspklApi('/api/killcam/' + encodeURIComponent(id)).then(function (d) {
+      if (!d || !d.id) { return; }
+      d.bytes = d.data;
+      d.data = null;
+      state.cams.push(d);
+      openViewer(id);
+    }).catch(function () {
+      rspklToast('That killcam is no longer on the board.');
+    });
   }
 
   function sampleCards() {
@@ -902,7 +940,7 @@
     var modal = $('#kc-modal');
     modal.classList.add('open');
     document.body.style.overflow = 'hidden';
-    $('#kc-modal-title').innerHTML = '<b>' + escapeHtml(card.killer) + '</b> vs ' + escapeHtml(card.victim);
+    $('#kc-modal-title').innerHTML = playerLink(card.killer, true) + ' vs ' + playerLink(card.victim, false);
     var vb = $('#kc-modal-vote');
     vb.setAttribute('data-vote', card.id);
     vb.classList.toggle('on', !!card.voted);
@@ -980,6 +1018,15 @@
       return;
     }
     $('#kc-status').textContent = 'Loading replay…';
+    // A cam opened from a link (`?cam=`) was already fetched to find out who is
+    // in it, and those bytes are the replay. Reusing them keeps a deep link to
+    // one request, and keeps the view counter honest: one watch, one view.
+    if (card.bytes) {
+      var carried = card.bytes;
+      card.bytes = null;
+      show(decodeCam(bytesFromBase64(carried)));
+      return;
+    }
     window.rspklApi('/api/killcam/' + encodeURIComponent(card.id))
       .then(function (d) { show(decodeCam(bytesFromBase64(d.data))); })
       .catch(function () { $('#kc-status').textContent = 'That replay could not be loaded.'; });
@@ -1095,6 +1142,24 @@
       if (player && player.cam) { player.resize(); player.draw(); }
       if (stage) { stage.resize(); }
     });
+
+    // Deep links: `?player=` opens the board filtered to one fighter, `?cam=`
+    // opens a single fight. Both are how the rest of the site points here -
+    // a profile's "all killcams", a feed post's "watch replay".
+    var params = new URLSearchParams(window.location.search);
+    var who = (params.get('player') || '').trim().slice(0, 24);
+    if (who) {
+      var filter = $('#kc-player-filter');
+      if (filter) { filter.value = who; }
+      state.sort = 'new';
+      var seg = $('#kc-sort');
+      if (seg) {
+        Array.prototype.forEach.call(seg.children, function (b) {
+          b.classList.toggle('on', b.getAttribute('data-sort') === 'new');
+        });
+      }
+    }
+    pendingCam = (params.get('cam') || '').trim().slice(0, 64) || null;
 
     fetchBoard();
   });

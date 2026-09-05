@@ -33,20 +33,8 @@ NAV_LINKS = [
     # TEMP: PLAY disabled/unused
     ("/hiscore/", "HISCORES", "hiscore"),
     ("/battles/", "BATTLES", "battles"),
-]
-
-MORE_LINKS = [
-    ("/battles/", "Battle Finder"),
-    ("/killcams/", "Top Killcams"),
-    ("/killfeed/", "Kill Feed"),
-    # TEMP: Vote disabled/unused
-    ("/itemlist/", "Item List"),
-    ("/droptable/", "Drop Table"),
-    ("sep",),
-    ("/staff/", "Staff List"),
-    ("/support/", "Support"),
-    ("/rules/", "Rules"),
-    ("/provablyfair/", "Provably Fair"),
+    ("/killcams/", "Top Killcams", "killcams"),
+    ("/killfeed/", "Kill Feed", "killfeed"),
 ]
 
 
@@ -55,33 +43,20 @@ def nav_html(active: str) -> str:
         f'<a class="nav-link{" active" if key == active else ""}" href="{href}">{label}</a>'
         for href, label, key in NAV_LINKS
     )
-    more = "".join(
-        '<div class="sep"></div>' if item[0] == "sep" else
-        f'<a href="{item[0]}">{item[1]}</a>'
-        for item in MORE_LINKS
-    )
     mobile = "".join(
         f'<a href="{href}">{label}</a>' for href, label, _ in NAV_LINKS
-    ) + "".join(
-        f'<a href="{item[0]}">{item[1]}</a>'
-        for item in MORE_LINKS if item[0] != "sep"
     )
     return f"""
     <header class="site-header">
       <div class="nav-inner">
-        <a class="brand" href="/" aria-label="RSPKL home">
-          <img src="{SKULL}" alt="RSPKL golden PK skull">
+        <a class="brand" href="/" aria-label="PK League home">
+          <img src="{SKULL}" alt="PK League golden skull">
           <span class="brand-mark">
-            <span class="over">Runescape</span>
             <span class="main">PK <span>League</span></span>
           </span>
         </a>
         <nav class="nav" aria-label="Primary">
           {links}
-          <div class="has-dropdown">
-            <a class="nav-link" href="/battles/">MORE <i class="bi bi-chevron-down" style="font-size:10px"></i></a>
-            <div class="dropdown">{more}</div>
-          </div>
           <div class="nav-cta">
             <a class="btn btn-gold btn-sm" href="/download/">ENTER LEAGUE</a>
           </div>
@@ -144,11 +119,11 @@ def footer_html(include_cart: bool = False) -> str:
     <footer class="site-footer">
       <div class="container">
         <div class="footer-cta">
-          <div class="t">RSPKL <span>· Competitive Old School PvP</span></div>
+          <div class="t">PK League <span>· Competitive Old School PvP</span></div>
         </div>
         <div class="footer-grid">{grid}</div>
         <div class="footer-bottom">
-          <div>&copy; <span class="js-year">2026</span> RUNESCAPE PK LEAGUE — All Rights Reserved.</div>
+          <div>&copy; <span class="js-year">2026</span> PK LEAGUE — All Rights Reserved.</div>
           <div class="legal">
             <a href="/rules/#terms">Terms of Service</a>
             <a href="/rules/#privacy">Privacy Policy</a>
@@ -341,10 +316,10 @@ def build_home():
       <div class="hero-bg"></div>
       <img class="hero-wm" src="{SKULL}" alt="">
       <div class="hero-inner">
-        <div class="season-banner" aria-label="Countdown to RSPKL Season 1">
+        <div class="season-banner" aria-label="Countdown to PK League Season 1">
           <div class="season-banner-title">
             <span class="season-number">S1</span>
-            <span><b>RuneScape PvP Ranked Ladder</b><small>Season 1 opens September 15 · 18:00 UTC</small></span>
+            <span><b>PK League PvP Ranked Ladder</b><small>Season 1 opens September 15 · 18:00 UTC</small></span>
           </div>
           <div class="season-countdown" aria-live="polite">
             <span><b class="js-cd-d">00</b><small>Days</small></span><i>:</i>
@@ -376,89 +351,20 @@ def build_home():
 
     """
 
-    page("index.html", "RuneScape PK League — The #1 PvP League",
-         "RSPKL — competitive Old School PvP. Five divisions, weekly hybrid tournaments, "
+    page("index.html", "PK League — The #1 PvP League",
+         "PK League — competitive Old School PvP. Five divisions, weekly hybrid tournaments, "
          "bounty tiers and a 250M PKP prize pool. Play instantly in your browser.",
          "home", content, extra_js="assets/js/killfeed.js")
-
-
-# ============================================================ PLAY
-def build_play():
-    content = f"""
-    {page_hero("Web client", "Play RSPKL <em>Instantly</em>",
-               "Browser client. No download. Accounts are created on first login.")}
-    <section class="section">
-      <div class="container">
-        <div class="client-frame rv">
-          <div class="client-titlebar">
-            <span><i class="bi bi-trophy"></i> RSPKL — Season 1 Client</span>
-            <span class="dots"><i></i><i></i><i></i></span>
-          </div>
-          <div class="client-canvas">
-            <img class="wm" src="{SKULL}" alt="">
-            <form class="login-card" id="launch-form">
-              <img src="{SKULL}" alt="Golden PK skull">
-              <h2>RuneScape PK League</h2>
-              <div class="sub">Season 1 · The Golden Skull</div>
-              <div class="field" style="text-align:left">
-                <label for="lc-user">Log-in name</label>
-                <input class="input" id="lc-user" autocomplete="username" placeholder="Choose your name">
-              </div>
-              <div class="field" style="text-align:left">
-                <label for="lc-pass">Password</label>
-                <input class="input" type="password" id="lc-pass" autocomplete="current-password" placeholder="New or existing">
-              </div>
-              <button class="btn btn-gold btn-block btn-lg" id="launch-btn" type="submit">
-                <i class="bi bi-play-fill"></i> LAUNCH CLIENT
-              </button>
-              <span class="btn-note">Accounts are created on first login</span>
-            </form>
-          </div>
-        </div>
-        <div class="status-strip">
-          <span>WORLDS <b>2</b></span>
-          <span>UPTIME <b>99.9%</b></span>
-          <span class="live"><span class="dot"></span> <b class="js-players">1,284</b> ONLINE</span>
-          <span>CLIENT <b id="client-status">STANDBY</b></span>
-        </div>
-        <div class="note-strip">
-          <i class="bi bi-info-circle"></i>
-          <span>Web client deploys with Season 1. Logins are stored on this device.</span>
-        </div>
-      </div>
-    </section>
-    <section class="section" id="mobile">
-      <div class="container">
-        {section_head("Platforms", "Desktop and Mobile")}
-        <div class="grid-2">
-          <div class="panel choice-card rv">
-            <span class="glyph"><i class="bi bi-display"></i></span>
-            <h3>Desktop Browser</h3>
-            <p>Full-screen interface. Launches from this page. No install.</p>
-            <a class="btn btn-gold" href="#top">OPEN WEB CLIENT</a>
-          </div>
-          <div class="panel choice-card rv">
-            <span class="glyph"><i class="bi bi-phone"></i></span>
-            <h3>Mobile Browser</h3>
-            <p>Touch controls. Same account, ladder and Wilderness as desktop.</p>
-            <a class="btn btn-outline js-soon" data-soon="The mobile client" href="#">OPEN MOBILE CLIENT</a>
-          </div>
-        </div>
-      </div>
-    </section>"""
-    page("play/index.html", "Web Client — Play RSPKL Instantly | RuneScape PK League",
-         "Play RSPKL instantly in your browser or on mobile. No download required — "
-         "accounts are created on first login.", "play", content, extra_js="assets/js/play.js")
 
 
 # ============================================================ DOWNLOAD
 def build_download():
     os_cards = ""
     for ic, name, feats, btn, hot in [
-        ("bi-windows", "Windows", ["Automatic updates", "Windows 10 &amp; 11", "RSPKL64.exe — 38MB", "Install tutorial"], "DOWNLOAD (64-BIT)", True),
-        ("bi-apple", "Mac OS", ["Automatic updates", "macOS 12 – 15", "RSPKL.dmg — 115MB", "Install tutorial"], "DOWNLOAD", False),
-        ("bi-linux", "Linux", ["Automatic updates", "Debian, Ubuntu &amp; more", "Unzip &amp; launch RSPKL", "RSPKL.jar — 80KB"], "DOWNLOAD", False),
-        ("bi-filetype-java", "Java JAR", ["Automatic updates", "All operating systems", "Requires Java 11+", "RSPKL.jar — 80KB"], "DOWNLOAD", False),
+        ("bi-windows", "Windows", ["Automatic updates", "Windows 10 &amp; 11", "PKLeague64.exe — 38MB", "Install tutorial"], "DOWNLOAD (64-BIT)", True),
+        ("bi-apple", "Mac OS", ["Automatic updates", "macOS 12 – 15", "PKLeague.dmg — 115MB", "Install tutorial"], "DOWNLOAD", False),
+        ("bi-linux", "Linux", ["Automatic updates", "Debian, Ubuntu &amp; more", "Unzip &amp; launch PK League", "PKLeague.jar — 80KB"], "DOWNLOAD", False),
+        ("bi-filetype-java", "Java JAR", ["Automatic updates", "All operating systems", "Requires Java 11+", "PKLeague.jar — 80KB"], "DOWNLOAD", False),
     ]:
         ul = "".join(f"<li>{f}</li>" for f in feats)
         os_cards += f"""<div class="os-card rv">
@@ -473,25 +379,6 @@ def build_download():
                "Windows, macOS, Linux and Java builds. All update automatically.")}
     <section class="section">
       <div class="container">
-        {section_head("Browser", "Instant Play")}
-        <div class="grid-2">
-          <div class="panel choice-card rv">
-            <span class="glyph"><i class="bi bi-window-desktop"></i></span>
-            <h3>Web Client</h3>
-            <p>Desktop browser. No download or registration.</p>
-            <a class="btn btn-gold" href="/play/">PLAY ON BROWSER</a>
-          </div>
-          <div class="panel choice-card rv">
-            <span class="glyph"><i class="bi bi-phone"></i></span>
-            <h3>Mobile Client</h3>
-            <p>Phone browser. Same account and ladder.</p>
-            <a class="btn btn-outline" href="/play/#mobile">PLAY ON MOBILE</a>
-          </div>
-        </div>
-      </div>
-    </section>
-    <section class="section">
-      <div class="container">
         {section_head("Native clients", "Download the Client")}
         <div class="os-grid">{os_cards}</div>
         <div class="note-strip">
@@ -500,9 +387,9 @@ def build_download():
         </div>
       </div>
     </section>"""
-    page("download/index.html", "Downloads — RSPKL Client | RuneScape PK League",
-         "Download the RSPKL client for Windows, macOS, Linux or Java — or play instantly "
-         "in your browser. All clients update automatically.", "download", content)
+    page("download/index.html", "Downloads — PK League Client",
+         "Download the PK League client for Windows, macOS, Linux or Java. "
+         "All clients update automatically.", "download", content)
 
 
 # ============================================================ REGISTER
@@ -510,25 +397,6 @@ def build_register():
     content = f"""
     {page_hero("Create your account", "Ready in <em>Seconds</em>",
                "No website sign-up. The account is created on first login.")}
-    <section class="section">
-      <div class="container">
-        {section_head("Clients", "Pick a Client")}
-        <div class="grid-2">
-          <div class="panel choice-card rv">
-            <span class="glyph"><i class="bi bi-window-desktop"></i></span>
-            <h3>Web Client</h3>
-            <p>Desktop browser. The account is created on first login.</p>
-            <a class="btn btn-gold" href="/play/">OPEN WEB CLIENT</a>
-          </div>
-          <div class="panel choice-card rv">
-            <span class="glyph"><i class="bi bi-phone"></i></span>
-            <h3>Mobile Client</h3>
-            <p>Phone browser. The account is created on first login.</p>
-            <a class="btn btn-outline" href="/play/#mobile">OPEN MOBILE CLIENT</a>
-          </div>
-        </div>
-      </div>
-    </section>
     <section class="section">
       <div class="container">
         {section_head("Procedure", "Three Steps")}
@@ -547,8 +415,8 @@ def build_register():
         </div>
       </div>
     </section>"""
-    page("register/index.html", "Create Your Account — Play Instantly | RuneScape PK League",
-         "Create your RSPKL account — no website sign-up required. Your account is "
+    page("register/index.html", "Create Your Account — Play Instantly | PK League",
+         "Create your PK League account — no website sign-up required. Your account is "
          "created the first time you log in.", "more", content)
 
 
@@ -707,7 +575,7 @@ def build_donate():
     )
 
     content = f"""
-    {page_hero("Shop", "RSPKL <em>Shop</em>",
+    {page_hero("Shop", "PK League <em>Shop</em>",
                "Credits, ranks, mystery boxes and scrolls. Instant in-game delivery.")}
     <section class="section">
       <div class="container">
@@ -774,8 +642,8 @@ def build_donate():
         The shop activates with Season 1 — carts are saved on this device until then.</p>
       </div>
     </section>"""
-    page("donate/index.html", "RSPKL Shop — Donations | RuneScape PK League",
-         "Support RSPKL and climb the tiers — league credits, supporter ranks, mystery "
+    page("donate/index.html", "PK League Shop — Donations",
+         "Support PK League and climb the tiers — league credits, supporter ranks, mystery "
          "boxes and scrolls. Instant in-game delivery, secure checkout.", "donate", content)
 
 
@@ -801,7 +669,7 @@ def build_hiscore():
     ])
 
     content = f"""
-    {page_hero("Ladders", "RSPKL <em>Hiscores</em>",
+    {page_hero("Ladders", "PK League <em>Hiscores</em>",
                "Combat, skills, LMS rating and monster killcounts. Normal and Hardcore PvP.")}
     <section class="section">
       <div class="container">
@@ -852,8 +720,8 @@ def build_hiscore():
         </div>
       </div>
     </section>"""
-    page("hiscore/index.html", "Hiscores — RSPKL Ladders | RuneScape PK League",
-         "RSPKL hiscores — top kills, KDR, Elo, streaks, skills, LMS rating and monster "
+    page("hiscore/index.html", "Hiscores — PK League Ladders",
+         "PK League hiscores — top kills, KDR, Elo, streaks, skills, LMS rating and monster "
          "killcounts across Normal and Hardcore PvP.", "hiscore", content,
          extra_js="assets/js/hiscore.js")
 
@@ -897,9 +765,12 @@ def build_player():
                 <div class="pp-tiles" id="pp-tiles"></div>
               </div>
             </div>
-            <div class="panel rv">
+            <div class="panel panel-killcams rv">
               <div class="panel-head">
-                <h3>FIGHTS</h3>
+                <div>
+                  <div class="panel-kicker"><i class="bi bi-play-circle-fill"></i> Replay archive</div>
+                  <h3>PLAYER KILLCAMS</h3>
+                </div>
                 <div class="seg" id="pp-cams">
                   <button class="on" data-cams="kills">Kills</button>
                   <button data-cams="deaths">Deaths</button>
@@ -907,6 +778,7 @@ def build_player():
                 </div>
               </div>
               <div class="panel-body tight">
+                <p class="pp-killcam-copy">Watch recorded fights from this player, including kills, deaths, and community favourites.</p>
                 <div class="kc-list" id="pp-cam-list"></div>
               </div>
             </div>
@@ -956,20 +828,15 @@ def build_player():
       </div>
     </section>
     <div id="pp-items" hidden data-items="{item_icon_version()}"></div>"""
-    page("player/index.html", "Player Profile — RSPKL | RuneScape PK League",
-         "An RSPKL player profile — kills, deaths, K/D, streaks, ladder positions, "
+    page("player/index.html", "Player Profile — PK League",
+         "A PK League player profile — kills, deaths, K/D, streaks, ladder positions, "
          "skills and every killcam the player appears in.", "hiscore", content,
          extra_js="assets/js/killcam-icons.js assets/js/player.js")
 
 
 # ============================================================ BATTLES
 def build_battles():
-    """The Battle Finder board and the fight-alert signup.
-
-    Two things on one page, because they are two halves of one intent: a
-    player looking at what is scheduled is exactly the player who wants
-    telling before it starts. Splitting them would put the signup on a page
-    nobody visits.
+    """The Battle Finder board.
 
     The board reads ``/api/battles?sort=hype`` - the high-value ordering, the
     same one the in-game panel's Featured tab uses - and falls back to a
@@ -1000,39 +867,6 @@ def build_battles():
           </div>
           <div class="side-col">
             <div class="panel rv">
-              <div class="panel-head"><h3>Fight alerts</h3></div>
-              <div class="panel-body">
-                <p class="sub">Email or text <b>5 minutes</b> and <b>1 minute</b> before the next battle.</p>
-                <form id="bf-alerts">
-                  <div class="field">
-                    <label for="bf-user">In-game name</label>
-                    <input class="input" id="bf-user" placeholder="Your account name" maxlength="24">
-                  </div>
-                  <div class="field">
-                    <label for="bf-channel">Send it by</label>
-                    <div class="seg" id="bf-channel">
-                      <button type="button" class="on" data-channel="email">Email</button>
-                      <button type="button" data-channel="sms">Text</button>
-                    </div>
-                  </div>
-                  <div class="field">
-                    <label for="bf-address" id="bf-address-label">Email address</label>
-                    <input class="input" id="bf-address" placeholder="you@example.com">
-                  </div>
-                  <button class="btn btn-gold btn-block" type="submit">SEND ME A CODE</button>
-                </form>
-                <form id="bf-verify" style="display:none">
-                  <div class="field">
-                    <label for="bf-code">Six-digit code</label>
-                    <input class="input" id="bf-code" placeholder="000000" maxlength="6" inputmode="numeric">
-                  </div>
-                  <button class="btn btn-gold btn-block" type="submit">CONFIRM</button>
-                  <button class="btn btn-block" type="button" id="bf-restart">Start again</button>
-                </form>
-                <p class="sub" id="bf-alert-note"></p>
-              </div>
-            </div>
-            <div class="panel rv">
               <div class="panel-head"><h3>How it works</h3></div>
               <div class="panel-body hs-cats">
                 <div class="cat-group">
@@ -1053,9 +887,9 @@ def build_battles():
         </div>
       </div>
     </section>"""
-    page("battles/index.html", "Battle Finder — RSPKL Scheduled PvP | RuneScape PK League",
-         "RSPKL Battle Finder - rated 1v1 battles on Pure NH, Zerk NH and Main NH builds, "
-         "the scheduled fight board, and 5-minute fight alerts by email or text.",
+    page("battles/index.html", "Battle Finder — PK League Scheduled PvP",
+         "PK League Battle Finder - rated 1v1 battles on Pure NH, Zerk NH and Main NH builds "
+         "the scheduled fight board.",
          "battles", content, extra_js="assets/js/battles.js")
 
 
@@ -1162,8 +996,8 @@ def build_killcams():
         <div class="kc-scoreboard" id="kc-scoreboard"></div>
       </div>
     </div>"""
-    page("killcams/index.html", "Top Killcams — RSPKL Replays | RuneScape PK League",
-         "Watch the top RSPKL killcams — the last five seconds of every wilderness kill, "
+    page("killcams/index.html", "Top Killcams — PK League Replays",
+         "Watch the top PK League killcams — the last five seconds of every wilderness kill, "
          "replayed tick by tick, and voted on by the league.", "killcams", content,
          extra_js=("assets/js/killcam-mesh.js assets/js/killcam-cam.js "
                    "assets/js/killcam-anim.js assets/js/killcam-figure.js "
@@ -1202,8 +1036,8 @@ def build_killfeed():
         </div>
       </div>
     </section>"""
-    page("killfeed/index.html", "Kill Feed — Recent Kills | RuneScape PK League",
-         "The RSPKL kill feed — every wilderness kill, newest first, with weapon, "
+    page("killfeed/index.html", "Kill Feed — Recent Kills | PK League",
+         "The PK League kill feed — every wilderness kill, newest first, with weapon, "
          "bracket, location and a replay link where a killcam was recorded.",
          "killfeed", content, extra_js="assets/js/killfeed.js")
 
@@ -1225,7 +1059,7 @@ def build_vote():
         </div>"""
 
     content = f"""
-    {page_hero("Toplists", "Vote for <em>RSPKL</em>",
+    {page_hero("Toplists", "Vote for <em>PK League</em>",
                "Five toplists. 12-hour cooldown each. Vote credits and PKP per vote.")}
     <section class="section">
       <div class="container">
@@ -1271,8 +1105,8 @@ def build_vote():
         </div>
       </div>
     </section>"""
-    page("vote/index.html", "Vote for a Reward — RSPKL | RuneScape PK League",
-         "Vote for RSPKL on the toplists and claim vote credits and PKP in-game every "
+    page("vote/index.html", "Vote for a Reward — PK League",
+         "Vote for PK League on the toplists and claim vote credits and PKP in-game every "
          "12 hours. Streak rewards include the Golden Skull token.", "more", content,
          extra_js="assets/js/vote.js")
 
@@ -1280,7 +1114,7 @@ def build_vote():
 # ============================================================ ITEMLIST
 def build_itemlist():
     content = f"""
-    {page_hero("Item database", "RSPKL <em>Item List</em>",
+    {page_hero("Item database", "PK League <em>Item List</em>",
                "Search by name or ID for in-game item stats.")}
     <section class="section">
       <div class="container">
@@ -1306,8 +1140,8 @@ def build_itemlist():
         </div>
       </div>
     </section>"""
-    page("itemlist/index.html", "Item List — RSPKL Item Database | RuneScape PK League",
-         "Browse the RSPKL item database — search by name or ID, view every item in the "
+    page("itemlist/index.html", "Item List — PK League Item Database",
+         "Browse the PK League item database — search by name or ID, view every item in the "
          "league toolkit.", "more", content, extra_js="assets/js/itemlist.js")
 
 
@@ -1364,8 +1198,8 @@ def build_droptable():
         </div>
       </div>
     </section>"""
-    page("droptable/index.html", "Drop Tables & Rate Calculator — RSPKL | RuneScape PK League",
-         "RSPKL monster drop tables with a live drop-rate calculator — preview exact "
+    page("droptable/index.html", "Drop Tables & Rate Calculator — PK League",
+         "PK League monster drop tables with a live drop-rate calculator — preview exact "
          "in-game rates for every supporter tier.", "more", content,
          extra_js="assets/js/droptable.js")
 
@@ -1395,7 +1229,7 @@ def build_staff():
     )
 
     content = f"""
-    {page_hero("The team", "RSPKL <em>Staff List</em>",
+    {page_hero("The team", "PK League <em>Staff List</em>",
                "League staff by in-game rank.")}
     <section class="section">
       <div class="container">
@@ -1408,8 +1242,8 @@ def build_staff():
         </div>
       </div>
     </section>"""
-    page("staff/index.html", "Staff List — Meet the RSPKL Team | RuneScape PK League",
-         "Meet the RSPKL staff — owners, council, moderators and server support, "
+    page("staff/index.html", "Staff List — Meet the PK League Team",
+         "Meet the PK League staff — owners, council, moderators and server support, "
          "grouped by in-game rank.", "more", content)
 
 
@@ -1445,11 +1279,11 @@ def build_support():
         for q, a in faq_items
     )
     content = f"""
-    {page_hero("Contact", "RSPKL <em>Support</em>",
+    {page_hero("Contact", "PK League <em>Support</em>",
                "Four channels: email, in-game ::staff, live chat, Discord.")}
     <section class="section">
       <div class="container">
-        {section_head("Channels", "Contact RSPKL")}
+        {section_head("Channels", "Contact PK League")}
         <div class="support-grid">{cards_html}</div>
         <div class="safety-note">
           <i class="bi bi-shield-exclamation"></i>
@@ -1463,8 +1297,8 @@ def build_support():
         <div class="faq rv" style="max-width:820px;margin:0 auto" id="report">{faq}</div>
       </div>
     </section>"""
-    page("support/index.html", "Support & Help — RSPKL | RuneScape PK League",
-         "RSPKL support — email, in-game ::staff, live chat and Discord tickets for "
+    page("support/index.html", "Support & Help — PK League",
+         "PK League support — email, in-game ::staff, live chat and Discord tickets for "
          "accounts, payments and reports.", "more", content)
 
 
@@ -1487,7 +1321,7 @@ def build_rules():
         for i, (t, d) in enumerate(rules, 1)
     )
     content = f"""
-    {page_hero("League law", "RSPKL <em>Rules</em>",
+    {page_hero("League law", "PK League <em>Rules</em>",
                "Ten rules, the punishment ladder, and legal policies.")}
     <section class="section">
       <div class="container">
@@ -1519,7 +1353,7 @@ def build_rules():
         </div>
         <div class="grid-2" id="privacy">
           <div class="panel rv"><div class="panel-head"><h3>Terms of Service</h3></div>
-            <div class="panel-body"><p class="small muted">RSPKL is an unofficial fan-made
+            <div class="panel-body"><p class="small muted">PK League is an unofficial fan-made
             league and is not affiliated with Jagex Ltd. Accounts and league items remain
             league property. Purchases grant in-game benefits only. We may amend these
             terms with notice on the news page.</p></div></div>
@@ -1532,8 +1366,8 @@ def build_rules():
         </div>
       </div>
     </section>"""
-    page("rules/index.html", "Rules — RSPKL Season Rulebook | RuneScape PK League",
-         "RSPKL rules — the ten golden rules of the league, punishment ladder, terms of "
+    page("rules/index.html", "Rules — PK League Season Rulebook",
+         "PK League rules — the ten golden rules of the league, punishment ladder, terms of "
          "service, privacy and refund policy.", "more", content)
 
 
@@ -1575,8 +1409,8 @@ def build_provablyfair():
         </div>
       </div>
     </section>"""
-    page("provablyfair/index.html", "Provably Fair — RSPKL | RuneScape PK League",
-         "RSPKL provably fair — how seed hashing makes every mystery box roll, stake and "
+    page("provablyfair/index.html", "Provably Fair — PK League",
+         "PK League provably fair — how seed hashing makes every mystery box roll, stake and "
          "tournament draw verifiable by players.", "more", content)
 
 
@@ -1597,7 +1431,7 @@ def build_404():
       </div>
     </div>"""
     # 404 lives at website root; assets resolve fine from there.
-    page("404.html", "404 — Lost in the Wilderness | RuneScape PK League",
+    page("404.html", "404 — Lost in the Wilderness | PK League",
          "Page not found.", "home", content)
 
 
@@ -1618,7 +1452,6 @@ def build_extras():
 
 if __name__ == "__main__":
     build_home()
-    build_play()
     build_download()
     build_register()
     build_donate()

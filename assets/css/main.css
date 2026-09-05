@@ -1,5 +1,5 @@
 /* ============================================================
-   RuneScape PK League (RSPKL) — Tournament Gold design system
+   PK League — Tournament Gold design system
    Palette: Champion Gold #f5d97a · Antique #c98f14 · Bronze
    Shadow #7d6320 · Obsidian #1b1a17 · Bone #e8e2d4 · Verdigris
    #2f6f5e. Type: Cinzel (display), Inter (body), IBM Plex Mono
@@ -137,19 +137,6 @@ h1,h2,h3,h4,.display{font-family:var(--font-display);font-weight:700;letter-spac
 }
 .nav-link:hover{color:var(--gold-hi)}
 .nav-link.active{color:var(--gold);border-bottom-color:var(--gold-2)}
-.has-dropdown{position:relative}
-.dropdown{
-  position:absolute;top:100%;left:0;min-width:215px;padding:8px;
-  background:var(--panel);border:1px solid var(--line-gold);border-radius:4px;
-  box-shadow:var(--shadow-1);display:none;z-index:70;
-}
-.has-dropdown:hover .dropdown{display:block}
-.dropdown a{
-  display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:3px;
-  color:var(--parch);font-weight:600;font-size:12.5px;letter-spacing:.06em;text-transform:uppercase;
-}
-.dropdown a:hover{background:rgba(201,143,20,.12);color:var(--gold-hi)}
-.dropdown .sep{height:1px;background:var(--line);margin:6px 4px}
 .nav-cta{margin-left:14px;flex:none}
 .burger{display:none;margin-left:auto;background:none;border:1px solid var(--line-2);border-radius:4px;color:var(--bone);width:40px;height:40px;font-size:20px;cursor:pointer}
 @media(max-width:940px){
@@ -1368,6 +1355,26 @@ tr.r1{background:rgba(201,143,20,.08)}
 }
 .pp-tile b{font-family:var(--font-display);font-size:23px;color:var(--gold);font-weight:700;line-height:1.1}
 .pp-tile em{font-style:normal;font-family:var(--font-mono);font-size:10px;letter-spacing:.12em;color:var(--ash)}
+.pp-rank-tile{
+  grid-column:1/-1;min-height:112px;position:relative;overflow:hidden;isolation:isolate;
+  display:flex;flex-direction:row;align-items:center;justify-content:space-between;gap:22px;
+  padding:20px 24px;background:linear-gradient(100deg,rgba(67,49,16,.97),rgba(29,27,19,.98) 58%,rgba(20,19,16,.99));
+  border-left:3px solid var(--gold);box-shadow:inset 0 1px rgba(255,226,141,.18);
+}
+.pp-rank-tile::after{content:"";position:absolute;inset:0;z-index:-1;opacity:.35;background:radial-gradient(circle at 87% 45%,rgba(201,143,20,.42),transparent 24%)}
+.pp-rank-tile-copy{display:flex;flex-direction:column;gap:3px}
+.pp-rank-tile-copy span,.pp-rank-tile-rating span{font-family:var(--font-mono);font-size:10px;letter-spacing:.24em;text-transform:uppercase;color:#c8ae71}
+.pp-rank-tile-copy b{font-size:31px;letter-spacing:.04em;color:var(--gold-hi);line-height:1}
+.pp-rank-tile-copy em{font-size:10.5px;color:var(--parch)}
+.pp-rank-tile-rating{margin-left:auto;text-align:right;display:flex;flex-direction:column;gap:2px}
+.pp-rank-tile-rating strong{font-family:var(--font-display);font-size:35px;line-height:1;color:var(--bone);font-variant-numeric:tabular-nums}
+.pp-rank-tile .kc-icon.pp-rank-crest{width:74px;height:74px;object-fit:contain;filter:drop-shadow(0 8px 12px rgba(0,0,0,.42))}
+@media(max-width:560px){
+  .pp-rank-tile{min-height:104px;padding:17px 16px;gap:12px}
+  .pp-rank-tile-copy b{font-size:26px}
+  .pp-rank-tile-rating strong{font-size:29px}
+  .pp-rank-tile .kc-icon.pp-rank-crest{width:57px;height:57px}
+}
 
 /* A fight on a profile is the same row the board draws, with the rank gutter
    spent on the verdict instead: a profile is read down one player's column, so
@@ -1377,6 +1384,11 @@ tr.r1{background:rgba(201,143,20,.08)}
 .pp-verdict.loss{color:#c96a63}
 .pp-foe{color:var(--muted);font-size:12.5px;margin-left:4px}
 .kc-names .u-link:hover b,.kc-names .u-link:hover span{color:var(--gold-hi)}
+.panel-killcams{border-top:2px solid var(--gold-2)}
+.panel-killcams .panel-head{align-items:center}
+.panel-kicker{margin-bottom:3px;font-family:var(--font-mono);font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--gold)}
+.panel-kicker i{margin-right:5px;font-size:10px}
+.pp-killcam-copy{margin:0;padding:12px 15px;border-bottom:1px solid var(--line);background:rgba(201,143,20,.045);color:var(--muted);font-size:12.5px;line-height:1.5}
 
 .pp-skills{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line)}
 @media(max-width:760px){.pp-skills{grid-template-columns:repeat(3,1fr)}}

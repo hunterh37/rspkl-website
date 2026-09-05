@@ -198,7 +198,7 @@
   }
 
   function renderHeader(d) {
-    document.title = d.name + ' — Player Profile | RuneScape PK League';
+    document.title = d.name + ' — Player Profile | PK League';
     $('#pp-name').textContent = d.name;
     var tier = rankOf(d.rating);
     var chips = [];
@@ -240,7 +240,17 @@
       return;
     }
     var ranks = (d.ranks && d.ranks[state.mode]) || {};
-    host.innerHTML = TILES.map(function (t) {
+    var rating = Number(st.elo) || 0;
+    var tier = rankOf(rating);
+    var position = ranks.elo;
+    var lead = '<div class="pp-rank-tile">' +
+      '<div class="pp-rank-tile-copy"><span>League rank</span>' +
+      '<b>' + (tier ? escapeHtml(tier.title) : 'Unrated') + '</b>' +
+      '<em>' + (position ? 'Ladder position #' + fmt(position) : 'No ladder position yet') + '</em></div>' +
+      '<div class="pp-rank-tile-rating"><span>Rating</span><strong>' + fmt(rating) + '</strong></div>' +
+      (tier ? icon(tier.emblem, 'pp-rank-crest', tier.title + ' tier') : '') +
+      '</div>';
+    host.innerHTML = lead + TILES.map(function (t) {
       var key = t[0];
       var value = key === 'kdr' ? (Number(st.kdr) || 0).toFixed(2) : fmt(st[key]);
       var rank = ranks[key] ? '<em>Rank #' + fmt(ranks[key]) + '</em>' : '';

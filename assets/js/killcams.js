@@ -257,7 +257,7 @@
 
     if (f.hp >= 0) {
       // Thirty by five, green over red, as the client draws it - the shape is
-      // as much a part of recognising a Runescape fight as the hitsplat is.
+      // as much a part of recognising a PK League fight as the hitsplat is.
       var bw = cell * 0.75, bh = Math.max(3, bw / 6);
       var bx = x - bw / 2, by = y - r - bh * 2.2;
       ctx.fillStyle = '#ff0000';

@@ -1,4 +1,4 @@
-/* RSPKL Battle Finder board + fight-alert signup.
+/* RSPKL Battle Finder board.
  *
  * Same conventions as hiscore.js: one IIFE, ES5 only, no framework, no build
  * step. The board falls back to an empty state rather than an error, because a
@@ -10,8 +10,6 @@
   'use strict';
 
   var api = window.rspklApi;
-  var toast = window.rspklToast || function () {};
-
   /* ---------------------------------------------------------- the board */
 
   var sort = 'hype';
@@ -112,135 +110,7 @@
     }
   }
 
-  /* --------------------------------------------------------- the alerts */
-
-  var channel = 'email';
-  var pendingId = null;
-
-  function note(message, bad) {
-    var el = document.getElementById('bf-alert-note');
-    if (!el) return;
-    el.textContent = message || '';
-    el.className = bad ? 'sub bad' : 'sub';
-  }
-
-  function bindChannel() {
-    var buttons = document.querySelectorAll('#bf-channel [data-channel]');
-    for (var i = 0; i < buttons.length; i++) {
-      buttons[i].addEventListener('click', function () {
-        var all = document.querySelectorAll('#bf-channel [data-channel]');
-        for (var j = 0; j < all.length; j++) all[j].className = '';
-        this.className = 'on';
-        channel = this.getAttribute('data-channel');
-        var label = document.getElementById('bf-address-label');
-        var input = document.getElementById('bf-address');
-        if (label) label.textContent = channel === 'sms' ? 'Phone number' : 'Email address';
-        if (input) {
-          input.placeholder = channel === 'sms' ? '+15551234567' : 'you@example.com';
-          input.value = '';
-        }
-      });
-    }
-  }
-
-  function post(path, body) {
-    if (!window.RSPKL || !window.RSPKL.apiBase) {
-      return Promise.reject(new Error('offline'));
-    }
-    return fetch(window.RSPKL.apiBase + path, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-      body: JSON.stringify(body)
-    }).then(function (res) {
-      return res.json().then(function (data) {
-        if (!res.ok) throw new Error(data && data.error ? data.error : 'request failed');
-        return data;
-      });
-    });
-  }
-
-  function showVerify(show) {
-    var subscribe = document.getElementById('bf-alerts');
-    var verify = document.getElementById('bf-verify');
-    if (subscribe) subscribe.style.display = show ? 'none' : '';
-    if (verify) verify.style.display = show ? '' : 'none';
-  }
-
-  function bindAlerts() {
-    var subscribe = document.getElementById('bf-alerts');
-    var verify = document.getElementById('bf-verify');
-    var restart = document.getElementById('bf-restart');
-
-    if (subscribe) {
-      subscribe.addEventListener('submit', function (event) {
-        event.preventDefault();
-        var user = (document.getElementById('bf-user') || {}).value || '';
-        var address = (document.getElementById('bf-address') || {}).value || '';
-        if (!user.trim() || !address.trim()) {
-          note('Both fields are needed.', true);
-          return;
-        }
-        note('Sending a code…');
-        post('/api/alerts/subscribe', {
-          username: user.trim(),
-          channel: channel,
-          address: address.trim(),
-          leadMinutes: [5, 1]
-        }).then(function (data) {
-          pendingId = data.contact ? data.contact.id : null;
-          if (!data.needsVerification) {
-            note('Already confirmed — your alert settings were updated.');
-            return;
-          }
-          if (!data.channelConfigured) {
-            note('That channel is not switched on yet on this server.', true);
-            return;
-          }
-          if (!data.sent) {
-            note('Could not send the code: ' + (data.detail || 'unknown error'), true);
-            return;
-          }
-          showVerify(true);
-          note('Code sent. It expires in 15 minutes.');
-        }, function (error) {
-          note(error.message === 'offline'
-            ? 'Alerts open when the league database goes live.'
-            : error.message, true);
-        });
-      });
-    }
-
-    if (verify) {
-      verify.addEventListener('submit', function (event) {
-        event.preventDefault();
-        var user = (document.getElementById('bf-user') || {}).value || '';
-        var code = (document.getElementById('bf-code') || {}).value || '';
-        post('/api/alerts/verify', {
-          username: user.trim(),
-          id: pendingId,
-          code: code.trim()
-        }).then(function () {
-          showVerify(false);
-          note('Confirmed. You will be told 5 minutes and 1 minute before each battle.');
-          toast('Fight alerts are on.');
-        }, function (error) {
-          note(error.message, true);
-        });
-      });
-    }
-
-    if (restart) {
-      restart.addEventListener('click', function () {
-        pendingId = null;
-        showVerify(false);
-        note('');
-      });
-    }
-  }
-
   bindSort();
-  bindChannel();
-  bindAlerts();
   load();
   // The board is a countdown, so it has to move on its own. Thirty seconds is
   // the API's own cache window plus a little - polling faster would only

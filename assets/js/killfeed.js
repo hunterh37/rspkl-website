@@ -1,8 +1,7 @@
 /* RSPKL Kill Feed — the homepage ticker and the /killfeed/ newsfeed.
 
-   Both read the same /api/killfeed endpoint, which is the killcams table read
-   in kill order rather than vote order (see server/web/src/killcams.js). A
-   post links to /killcams/ for replay only when the kill actually sampled one
+   Both read the same /api/killfeed endpoint, which records every eligible
+   server-side PvP kill. A post links to /killcams/ for replay only when the kill actually sampled one
    - not every kill does, and a link into a cam that is not there would be a
    dead end dressed as a feature. */
 (function () {
@@ -64,7 +63,7 @@
 
   function postCardHtml(p) {
     var replay = p.hasReplay
-      ? '<a class="btn btn-outline btn-sm" href="/killcams/?cam=' + encodeURIComponent(p.id) +
+      ? '<a class="btn btn-outline btn-sm" href="/killcams/?cam=' + encodeURIComponent(p.replayId || p.id) +
         '">WATCH REPLAY</a>'
       : '<span class="kf-noreplay">No replay sampled</span>';
     return '' +

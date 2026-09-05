@@ -213,10 +213,10 @@
     var r = cell * 0.32;
     var f = at.frame;
 
-    // An animation is the fighter doing something on this tick — a swing, a
-    // block, a special. The cam knows the id, not what it looks like, so it is
-    // drawn as a strike ring rather than guessed at.
-    if (f.anim >= 0) {
+    // A ring denotes an accepted attack start. A defender can animate on this
+    // tick too (block, recoil, delayed hit); drawing every animation as a
+    // strike was what made the board imply simultaneous attacks.
+    if (f.attack) {
       ctx.strokeStyle = isKiller ? 'rgba(245,217,122,.55)' : 'rgba(232,119,111,.5)';
       ctx.lineWidth = 2;
       ctx.beginPath();
@@ -518,15 +518,27 @@
   }
 
   /* A sample cam's fight, so the player has something to draw with no API.
-     Nine ticks of two fighters closing, hitting and one dying. */
+     Nine ticks of two fighters closing, hitting and one dying. Samples still
+     obey the weapon cadence: they are an offline preview, not permission to
+     invent a counterattack every other tick. */
   function sampleCam(card) {
-    function actor(path, hits, anims) {
+    function attackTicks(weapon) {
+      // The three sample weapons. The final hit is the anchor; each earlier
+      // start is exactly its real weapon speed before it.
+      if (weapon === 11802) { return [2, 8]; } // Armadyl godsword: 6 ticks
+      if (weapon === 13652) { return [0, 4, 8]; } // Dragon claws: 4 ticks
+      if (weapon === 4153) { return [1, 8]; } // Granite maul: 7 ticks
+      return [0, 4, 8];
+    }
+    function actor(path, hits, attacks) {
       return {
         name: '',
         frames: path.map(function (p, i) {
+          var attack = attacks.indexOf(i) >= 0;
           return {
             dx: p[0], dy: p[1],
-            anim: anims.indexOf(i) >= 0 ? 422 : -1,
+            anim: attack ? 422 : -1,
+            attack: attack,
             gfx: -1, gfxHeight: -1,
             damage: hits[i] === undefined ? -1 : hits[i],
             // Blue for a zero, red for a hit - the two masks a fight is mostly
@@ -541,11 +553,11 @@
     var killer = actor(
       [[-3, -3, 100, 1, 1], [-2, -2, 100, 1, 1], [-2, -1, 94, 1, 1], [-1, -1, 94, 1, 1],
        [-1, 0, 88, 1, 0], [0, 0, 82, 1, 0], [0, 0, 76, 1, 0], [0, 0, 70, 1, 0], [0, 0, 62, 1, 0]],
-      { 2: 6, 4: 6, 6: 6, 8: 8 }, [1, 3, 5, 7]);
+      { 2: 6, 4: 6, 6: 6, 8: 8 }, attackTicks(card.weapon));
     var victim = actor(
       [[2, 3, 100, -1, -1], [2, 2, 92, -1, -1], [1, 2, 78, -1, -1], [1, 1, 78, -1, -1],
        [1, 1, 61, -1, 0], [1, 0, 44, -1, 0], [1, 0, 44, -1, 0], [1, 0, 22, -1, 0], [1, 0, 0, -1, 0]],
-      { 1: 8, 2: 14, 4: 17, 5: 17, 7: 22, 8: 22 }, [2, 4, 6]);
+      { 1: 8, 2: 14, 4: 17, 5: 17, 7: 22, 8: 22 }, []);
     killer.name = card.killer;
     victim.name = card.victim;
     return {
@@ -757,7 +769,7 @@
       '<div class="kc-who-line">' +
         headIcon('pk', look && look.skullIcon >= 0 ? look.skullIcon : -1, 'Skulled') +
         headIcon('prayer', look && look.prayerIcon >= 0 ? look.prayerIcon : -1, 'Overhead prayer') +
-        '<b>' + escapeHtml(side.name || (side.key === 'killer' ? 'Killer' : 'Victim')) + '</b>' +
+        playerLink(side.name || (side.key === 'killer' ? 'Killer' : 'Victim'), side.key === 'killer') +
       '</div>' +
       '<div class="kc-who-sub">' +
         '<span class="kc-tagline ' + (won ? 'win' : 'loss') + '">' + (won ? 'Winner' : 'Defeated') + '</span>' +
@@ -825,8 +837,8 @@
     }
     return '<div class="kc-tape" id="kc-tape">' +
       '<div class="kc-tape-key">' +
-        '<span class="k">' + escapeHtml(sides[0].name || 'Killer') + ' landed</span>' +
-        '<span class="v">' + escapeHtml(sides[1].name || 'Victim') + ' landed</span>' +
+        '<span class="k">' + playerLink(sides[0].name || 'Killer', true) + ' landed</span>' +
+        '<span class="v">' + playerLink(sides[1].name || 'Victim', false) + ' landed</span>' +
       '</div>' +
       '<div class="kc-tape-cols">' + cols + '</div></div>';
   }

@@ -80,7 +80,7 @@
     // anywhere is carried by the flag that wrote the field, not by its value.
     // Reading the pair as the sentinel turned a fighter standing there back to
     // whatever they last faced.
-    var out = { dx: 0, dy: 0, anim: -1, gfx: -1, gfxHeight: -1, damage: -1, hitType: -1, hp: -1, faceDx: -1, faceDy: -1, facing: false };
+    var out = { dx: 0, dy: 0, anim: -1, attack: false, gfx: -1, gfxHeight: -1, damage: -1, hitType: -1, hp: -1, faceDx: -1, faceDy: -1, facing: false };
     if (f & 0x01) { out.dx = r.s8(); out.dy = r.s8(); }
     if (f & 0x02) {
       // 65535 is the game's "stop animating" id rather than an animation, the
@@ -93,6 +93,9 @@
     if (f & 0x08) { out.damage = r.u8(); out.hitType = r.u8(); }
     if (f & 0x10) { out.hp = r.u8(); }
     if (f & 0x20) { out.faceDx = r.s8(); out.faceDy = r.s8(); out.facing = true; }
+	// 0x40 was added without changing the shape of the optional fields, so old
+	// recordings decode as before and simply have no explicit attack marker.
+	out.attack = (f & 0x40) !== 0;
     return out;
   }
 

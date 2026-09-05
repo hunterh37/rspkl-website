@@ -6,10 +6,10 @@
    which animation, and how far into it - and neither is stored in the cam
    directly.
 
-   Which animation is the cam's answer where it has one. A frame that carries an
-   animation id is a swing, a block or a special, and it began on the tick it
-   was sampled on, because a tick is the earliest the recorder could have seen
-   it. Where the cam has no answer the fighter's own animations decide: they
+   Which animation is the cam's answer where it has one. The capture stream also
+   marks accepted attack starts separately, so a defender's block stays a block
+   instead of being misclassified as a simultaneous counterattack. Where the cam
+   has no answer the fighter's own animations decide: they
    walked if their tile changed, and stood if it did not, and both of those ids
    come out of the appearance block rather than out of the recording.
 

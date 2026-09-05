@@ -20,7 +20,9 @@ FONTS = (
     '&family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;600'
     '&display=swap" rel="stylesheet">\n'
     '  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons'
-    '@1.13.1/font/bootstrap-icons.min.css">\n'
+    '@1.13.1/font/bootstrap-icons.min.css"'
+    ' integrity="sha384-CK2SzKma4jA5H/MXDUU7i1TqZlCFaD4T01vtyDFvPlD97JQyS+IsSh1nI2EFbpyk"'
+    ' crossorigin="anonymous">\n'
     '  <link rel="stylesheet" href="/assets/css/main.css">'
 )
 
@@ -604,10 +606,10 @@ def build_donate():
         <div class="shop-grid">{scrolls}</div>
 
         <div class="shop-foot">
-          <button class="btn btn-outline btn-lg" id="cart-open-btn" onclick="document.getElementById('cart-fab').click()">
+          <button class="btn btn-outline btn-lg js-cart-open" id="cart-open-btn">
             <i class="bi bi-trophy"></i> VIEW CART
           </button>
-          <button class="btn btn-gold btn-lg" onclick="document.getElementById('cart-fab').click()">
+          <button class="btn btn-gold btn-lg js-cart-open">
             CHECKOUT
           </button>
         </div>

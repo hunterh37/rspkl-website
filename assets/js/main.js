@@ -45,7 +45,8 @@
   window.rspklToast = function (msg) {
     var t = $('#toast');
     if (!t) { return; }
-    t.innerHTML = '<i class="bi bi-patch-check-fill"></i><span>' + msg + '</span>';
+    t.innerHTML = '<i class="bi bi-patch-check-fill"></i><span></span>';
+    t.lastChild.textContent = String(msg);
     t.classList.add('show');
     clearTimeout(toastTimer);
     toastTimer = setTimeout(function () { t.classList.remove('show'); }, 3400);
@@ -199,6 +200,7 @@
     if (overlay) { overlay.classList.toggle('open', v); }
   }
   if (fab) { fab.addEventListener('click', function () { cartOpen(!drawer.classList.contains('open')); }); }
+  $$('.js-cart-open').forEach(function (b) { b.addEventListener('click', function () { cartOpen(true); }); });
   if (overlay) { overlay.addEventListener('click', function () { cartOpen(false); }); }
   var cx = $('#cart-close');
   if (cx) { cx.addEventListener('click', function () { cartOpen(false); }); }
